@@ -533,52 +533,63 @@ h1 span {
   object-position: center;
 }
 
-.feature-disc-motion {
+.feature-record-motion {
   position: absolute;
   z-index: 102;
-  left: -9%;
-  bottom: -10%;
-  width: 84%;
-  aspect-ratio: 1;
-  border-radius: 50%;
-  background:
-    conic-gradient(
-      from 20deg,
-      transparent 0 12%,
-      rgb(255 231 196 / 42%) 14%,
-      transparent 19% 43%,
-      rgb(255 231 196 / 30%) 46%,
-      transparent 51% 74%,
-      rgb(255 231 196 / 38%) 77%,
-      transparent 82%
-    ),
-    radial-gradient(
-      circle,
-      transparent 0 46%,
-      rgb(255 231 196 / 18%) 46.5% 47.2%,
-      transparent 47.8% 64%,
-      rgb(255 231 196 / 14%) 64.5% 65.2%,
-      transparent 65.8%
-    );
-  mix-blend-mode: screen;
-  opacity: 0.82;
+  inset: 0;
+  clip-path: circle(53.8% at 18% 82.6%);
+  transform-origin: 18% 82.6%;
   pointer-events: none;
-  animation: feature-disc-spin 3.4s linear infinite;
+  animation: feature-record-spin 2.8s linear infinite;
 }
 
-.feature-disc-motion::after {
+.feature-record-image,
+.feature-static-overlay {
   position: absolute;
-  top: 8%;
-  left: 50%;
-  width: 0.75rem;
-  aspect-ratio: 1;
-  border-radius: 50%;
-  background: var(--cream);
-  box-shadow: 0 0 0.8rem rgb(255 231 196 / 85%);
+  inset: 0;
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.feature-record-motion::after {
+  position: absolute;
+  z-index: 1;
+  top: 70.5%;
+  left: 17.6%;
+  width: 0.62rem;
+  height: 1.65rem;
+  border-radius: 999rem;
+  background: rgb(42 29 22 / 72%);
+  box-shadow: 0 0 0 0.14rem rgb(243 217 185 / 28%);
   content: "";
 }
 
-@keyframes feature-disc-spin {
+.feature-static-overlay {
+  z-index: 103;
+  pointer-events: none;
+}
+
+.feature-turntable-overlay {
+  clip-path: polygon(78% 0, 100% 0, 100% 68%, 86% 61%, 76% 43%);
+}
+
+.feature-tonearm-overlay {
+  clip-path: polygon(
+    94% 7%,
+    100% 10%,
+    65% 70%,
+    58% 85%,
+    47% 99%,
+    43% 96%,
+    52% 81%,
+    61% 67%
+  );
+}
+
+@keyframes feature-record-spin {
   to {
     transform: rotate(1turn);
   }
@@ -772,6 +783,16 @@ h1 span {
 
   .features-visual {
     aspect-ratio: 1.065;
+  }
+
+  .feature-record-motion {
+    clip-path: circle(50% at 21.8% 84.7%);
+    transform-origin: 21.8% 84.7%;
+  }
+
+  .feature-record-motion::after {
+    top: 71.8%;
+    left: 21.4%;
   }
 }
 

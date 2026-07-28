@@ -373,7 +373,34 @@ export default function Home() {
               height={1254}
               unoptimized
             />
-            <span className="feature-disc-motion" aria-hidden="true" />
+            <div className="feature-record-motion" aria-hidden="true">
+              <Image
+                className="feature-record-image"
+                src="/feature-art-turntable-v1.png"
+                alt=""
+                width={1254}
+                height={1254}
+                unoptimized
+              />
+            </div>
+            <Image
+              className="feature-static-overlay feature-turntable-overlay"
+              src="/feature-art-turntable-v1.png"
+              alt=""
+              width={1254}
+              height={1254}
+              unoptimized
+              aria-hidden="true"
+            />
+            <Image
+              className="feature-static-overlay feature-tonearm-overlay"
+              src="/feature-art-turntable-v1.png"
+              alt=""
+              width={1254}
+              height={1254}
+              unoptimized
+              aria-hidden="true"
+            />
           </div>
         </section>
       </section>
