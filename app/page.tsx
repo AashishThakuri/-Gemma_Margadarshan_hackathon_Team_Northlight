@@ -11,9 +11,9 @@ const CASSETTE_REELS = [
   { id: "top-left", x: 330, y: 193, size: 36 },
   { id: "top-right", x: 480, y: 167, size: 36 },
   { id: "middle-left", x: 326, y: 432, size: 34 },
-  { id: "middle-right", x: 477, y: 414, size: 34 },
-  { id: "bottom-left", x: 294, y: 663, size: 33 },
-  { id: "bottom-right", x: 439, y: 677, size: 33 },
+  { id: "middle-right", x: 477, y: 421, size: 34 },
+  { id: "bottom-left", x: 294, y: 670, size: 33 },
+  { id: "bottom-right", x: 439, y: 684, size: 33 },
 ] as const;
 
 const CASSETTE_WINDOWS = [
