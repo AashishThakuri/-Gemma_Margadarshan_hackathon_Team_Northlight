@@ -541,27 +541,40 @@ h1 span {
   width: 84%;
   aspect-ratio: 1;
   border-radius: 50%;
-  background: conic-gradient(
-    from 25deg,
-    transparent 0 18%,
-    rgb(243 217 185 / 16%) 20%,
-    transparent 24% 58%,
-    rgb(243 217 185 / 10%) 60%,
-    transparent 64%
-  );
-  mix-blend-mode: soft-light;
+  background:
+    conic-gradient(
+      from 20deg,
+      transparent 0 12%,
+      rgb(255 231 196 / 42%) 14%,
+      transparent 19% 43%,
+      rgb(255 231 196 / 30%) 46%,
+      transparent 51% 74%,
+      rgb(255 231 196 / 38%) 77%,
+      transparent 82%
+    ),
+    radial-gradient(
+      circle,
+      transparent 0 46%,
+      rgb(255 231 196 / 18%) 46.5% 47.2%,
+      transparent 47.8% 64%,
+      rgb(255 231 196 / 14%) 64.5% 65.2%,
+      transparent 65.8%
+    );
+  mix-blend-mode: screen;
+  opacity: 0.82;
   pointer-events: none;
-  animation: feature-disc-spin 5.5s linear infinite;
+  animation: feature-disc-spin 3.4s linear infinite;
 }
 
 .feature-disc-motion::after {
   position: absolute;
-  top: 12%;
+  top: 8%;
   left: 50%;
-  width: 0.45rem;
+  width: 0.75rem;
   aspect-ratio: 1;
   border-radius: 50%;
-  background: rgb(243 217 185 / 45%);
+  background: var(--cream);
+  box-shadow: 0 0 0.8rem rgb(255 231 196 / 85%);
   content: "";
 }
 
