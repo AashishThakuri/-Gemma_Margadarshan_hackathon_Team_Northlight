@@ -39,6 +39,7 @@ const ABOUT_CASSETTE_WINDOW = {
 const NAVIGATION = [
   { label: "ABOUT", href: "#about" },
   { label: "FEATURES", href: "#features" },
+  { label: "ARCHIVE", href: "#archive" },
   { label: "LANGUAGES", href: "#languages" },
   { label: "CONTACT", href: "mailto:hello@boli.live" },
 ];
@@ -104,6 +105,7 @@ function observeArtworkMarkers(
 export default function Home() {
   const artworkRoot = useRef<HTMLElement>(null);
   const aboutArtworkRoot = useRef<HTMLDivElement>(null);
+  const archiveRoot = useRef<HTMLElement>(null);
 
   useEffect(() => {
     const root = artworkRoot.current;
@@ -141,6 +143,34 @@ export default function Home() {
       markerObserver.disconnect();
       scope.revert();
     };
+  }, []);
+
+  useEffect(() => {
+    const root = archiveRoot.current;
+
+    if (!root) {
+      return;
+    }
+
+    const revealArchive = () => root.classList.add("is-visible");
+
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      revealArchive();
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          revealArchive();
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.32 },
+    );
+
+    observer.observe(root);
+    return () => observer.disconnect();
   }, []);
 
   useEffect(() => {
@@ -374,6 +404,59 @@ export default function Home() {
               unoptimized
             />
             <span className="feature-disc-motion" aria-hidden="true" />
+          </div>
+        </section>
+
+        <section
+          className="archive-section"
+          id="archive"
+          aria-labelledby="archive-title"
+          ref={archiveRoot}
+        >
+          <div className="archive-stage">
+            <p className="archive-kicker">VOLUME 01 / BOLI</p>
+
+            <div className="archive-book" aria-label="The Caption Archive book">
+              <div className="archive-spread" aria-hidden="true">
+                <article className="archive-page archive-page-left">
+                  <span className="archive-page-number">01</span>
+                  <p className="archive-page-label">LISTENING NOTES</p>
+                  <h2 id="archive-title">
+                    EVERY WORD
+                    <br />
+                    BELONGS
+                    <br />
+                    IN FRAME.
+                  </h2>
+                  <span className="archive-spark">✦</span>
+                </article>
+
+                <article className="archive-page archive-page-right">
+                  <span className="archive-page-number">02</span>
+                  <p className="archive-page-label">TWO LANGUAGES / ONE MOMENT</p>
+                  <p className="archive-language">नेपाली + मैथिली</p>
+                  <p className="archive-caption-copy">
+                    Boli catches the moment as it happens and gives every voice
+                    a place to land.
+                  </p>
+                  <span className="archive-live">LIVE / 00:01:24</span>
+                </article>
+              </div>
+
+              <article className="archive-cover" aria-hidden="true">
+                <span className="archive-cover-volume">BOLI / VOL. 01</span>
+                <p>THE</p>
+                <h2>CAPTION</h2>
+                <h2>ARCHIVE</h2>
+                <span className="archive-cover-rule" />
+                <span className="archive-cover-language">NEPALI + MAITHILI</span>
+                <span className="archive-cover-star">✦</span>
+              </article>
+
+              <span className="archive-spine" aria-hidden="true" />
+            </div>
+
+            <p className="archive-status">OPENING THE ARCHIVE</p>
           </div>
         </section>
       </section>
