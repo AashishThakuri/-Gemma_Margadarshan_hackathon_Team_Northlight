@@ -18,7 +18,7 @@
   );
   --font-display: "Fraunces", "Bookman Old Style", Georgia, serif;
   --font-body: "DM Sans", Arial, sans-serif;
-  --font-mono: "Courier New", Courier, monospace;
+  --font-mono: "Space Mono", "Courier New", Courier, monospace;
 }
 
 * {
@@ -63,6 +63,8 @@ body::after {
   position: fixed;
   z-index: 100;
   inset: -18%;
+  backface-visibility: hidden;
+  contain: strict;
   content: "";
   pointer-events: none;
 }
@@ -702,6 +704,9 @@ h1 span i {
   mix-blend-mode: soft-light;
   opacity: 1;
   pointer-events: none;
+  backface-visibility: hidden;
+  contain: strict;
+  transform: translateZ(0);
   will-change: transform;
   animation: feature-disc-spin 4.8s linear infinite;
 }
