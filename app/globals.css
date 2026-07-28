@@ -9,6 +9,11 @@
   --frame-border: 0.25rem;
   --frame-radius: 1.8rem;
   --rule-width: 0.3rem;
+  --navbar-height: 6.25rem;
+  --section-height: calc(
+    100svh - (var(--frame-gap) * 2) - (var(--frame-border) * 2) -
+      var(--navbar-height)
+  );
   --font-display: "Fraunces", "Bookman Old Style", Georgia, serif;
   --font-body: "DM Sans", Arial, sans-serif;
 }
@@ -79,7 +84,7 @@ a {
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;
-  min-height: 6.25rem;
+  min-height: var(--navbar-height);
   padding: 0 5.4rem;
   border-bottom: var(--rule-width) solid var(--ink);
   background: var(--cream);
@@ -154,9 +159,9 @@ a {
 
 .hero {
   display: grid;
-  flex: 1;
+  flex: none;
   grid-template-columns: 1.08fr 1fr;
-  min-height: 0;
+  min-height: var(--section-height);
   border-bottom: var(--rule-width) solid var(--ink);
 }
 
@@ -292,6 +297,74 @@ h1 span {
   will-change: transform, opacity;
 }
 
+.about-section {
+  display: grid;
+  min-height: var(--section-height);
+  grid-template-columns: 1.08fr 1fr;
+  background: var(--cream);
+}
+
+.about-visual {
+  position: relative;
+  min-width: 0;
+  overflow: hidden;
+  border-right: var(--rule-width) solid var(--ink);
+}
+
+.about-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.about-copy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  justify-content: center;
+  gap: clamp(2.5rem, 4vw, 4.8rem);
+  padding: clamp(3.4rem, 5vw, 6.4rem);
+}
+
+.about-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+}
+
+.about-heading h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(4.4rem, 6vw, 7.4rem);
+  font-weight: 900;
+  letter-spacing: -0.07em;
+  line-height: 0.9;
+}
+
+.about-heading span {
+  flex: 0 0 auto;
+  font-size: clamp(3.2rem, 4vw, 5.1rem);
+  line-height: 1;
+}
+
+.about-text {
+  display: grid;
+  max-width: 36rem;
+  gap: clamp(1.8rem, 2.4vw, 3rem);
+}
+
+.about-text p {
+  margin: 0;
+  font-size: clamp(1.15rem, 1.55vw, 1.85rem);
+  letter-spacing: -0.035em;
+  line-height: 1.42;
+}
+
 @keyframes film-grain {
   0% {
     transform: translate(0, 0);
@@ -416,6 +489,7 @@ h1 span {
 
   .hero {
     grid-template-columns: 1fr;
+    min-height: 0;
   }
 
   .message-panel {
@@ -437,6 +511,21 @@ h1 span {
     aspect-ratio: 0.94;
   }
 
+  .about-section {
+    min-height: 0;
+    grid-template-columns: 1fr;
+  }
+
+  .about-visual {
+    aspect-ratio: 1.065;
+    border-right: 0;
+    border-bottom: var(--rule-width) solid var(--ink);
+  }
+
+  .about-copy {
+    min-height: 38rem;
+    padding: 4.8rem 4.4rem;
+  }
 }
 
 @media (max-width: 42rem) {
@@ -445,6 +534,7 @@ h1 span {
     --frame-border: 0.2rem;
     --frame-radius: 1.35rem;
     --rule-width: 0.25rem;
+    --navbar-height: 4.8rem;
   }
 
   .site-shell {
@@ -452,7 +542,6 @@ h1 span {
   }
 
   .navbar {
-    min-height: 4.8rem;
     padding: 0 1.35rem;
   }
 
@@ -481,6 +570,32 @@ h1 span {
 
   .visual-panel {
     aspect-ratio: 0.9;
+  }
+
+  .about-copy {
+    min-height: 32rem;
+    gap: 2.4rem;
+    padding: 3.6rem 1.35rem;
+  }
+
+  .about-heading {
+    gap: 1.4rem;
+  }
+
+  .about-heading h2 {
+    font-size: clamp(3.8rem, 17vw, 5.2rem);
+  }
+
+  .about-heading span {
+    font-size: clamp(2.8rem, 12vw, 4rem);
+  }
+
+  .about-text {
+    gap: 1.7rem;
+  }
+
+  .about-text p {
+    font-size: clamp(1.05rem, 5vw, 1.3rem);
   }
 
   body::after {

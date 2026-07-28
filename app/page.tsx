@@ -147,7 +147,7 @@ export default function Home() {
         </header>
 
         <div className="hero">
-          <section className="message-panel" id="about">
+          <section className="message-panel">
             <div className="headline-box">
               <h1>
                 <span>LIVE</span>
@@ -211,6 +211,39 @@ export default function Home() {
             </div>
           </section>
         </div>
+
+        <section className="about-section" id="about" aria-labelledby="about-title">
+          <div className="about-visual">
+            <Image
+              className="about-image"
+              src="/about-section-image.png"
+              alt="A retro live-caption cassette, headphones, speaker, and caption notes"
+              width={1295}
+              height={1216}
+              unoptimized
+            />
+          </div>
+
+          <div className="about-copy">
+            <div className="about-heading">
+              <h2 id="about-title">ABOUT</h2>
+              <span aria-hidden="true">✦</span>
+            </div>
+
+            <div className="about-text">
+              <p>
+                Boli helps Nepali and Maithili speakers follow every kind of
+                video without missing the moment. It listens as content plays
+                and turns speech into clear, readable captions in real time.
+              </p>
+              <p>
+                From lessons and livestreams to interviews and everyday clips,
+                our goal is simple: make video easier to understand, more
+                inclusive, and accessible wherever people press play.
+              </p>
+            </div>
+          </div>
+        </section>
       </section>
     </main>
   );
