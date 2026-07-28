@@ -25,8 +25,8 @@ const CASSETTE_WINDOWS = [
 const ABOUT_ARTWORK_SIZE = { width: 1295, height: 1216 } as const;
 
 const ABOUT_CASSETTE_REELS = [
-  { id: "left", x: 490, y: 620, size: 82 },
-  { id: "right", x: 793, y: 620, size: 82 },
+  { id: "left", x: 493, y: 623, size: 70 },
+  { id: "right", x: 795, y: 623, size: 70 },
 ] as const;
 
 const ABOUT_CASSETTE_WINDOW = {
