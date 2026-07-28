@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import type { CSSProperties, MouseEvent } from "react";
+import type { MouseEvent } from "react";
 
 const NAVIGATION = [
   { label: "ABOUT", href: "#about" },
@@ -9,8 +9,6 @@ const NAVIGATION = [
   { label: "LANGUAGES", href: "#languages" },
   { label: "CONTACT", href: "mailto:hello@boli.live" },
 ];
-
-const FLOWER_PETALS = Array.from({ length: 6 }, (_, index) => index * 60);
 
 function closeMobileMenu(event: MouseEvent<HTMLAnchorElement>) {
   event.currentTarget.closest("details")?.removeAttribute("open");
@@ -73,28 +71,15 @@ export default function Home() {
           </section>
 
           <section className="visual-panel" id="features" aria-label="Live caption visual">
-            <div className="flower-art" aria-hidden="true">
-              <div className="petals">
-                {FLOWER_PETALS.map((angle) => (
-                  <span
-                    className="petal"
-                    key={angle}
-                    style={{ "--petal-angle": `${angle}deg` } as CSSProperties}
-                  />
-                ))}
-              </div>
-
-              <div className="cassette-shadow" />
-              <Image
-                className="hero-image"
-                src="/Hero-section-image.png"
-                alt="Three retro cassette tapes in black, red, and cream"
-                width={1024}
-                height={1536}
-                priority
-                unoptimized
-              />
-            </div>
+            <Image
+              className="reference-art"
+              src="/poster-reference.png"
+              alt="Three oversized retro cassette tapes over a cream flower"
+              width={1731}
+              height={909}
+              priority
+              unoptimized
+            />
           </section>
         </div>
       </section>
