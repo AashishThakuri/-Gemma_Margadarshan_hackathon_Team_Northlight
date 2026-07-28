@@ -382,9 +382,9 @@ export default function Home() {
             <Image
               className="features-image"
               src="/feature-section-image.png"
-              alt="A restored vintage typewriter viewed from above"
-              width={1295}
-              height={1216}
+              alt="A black-and-white illustration of a person carrying retro audio equipment"
+              width={3000}
+              height={3000}
               unoptimized
             />
           </div>
