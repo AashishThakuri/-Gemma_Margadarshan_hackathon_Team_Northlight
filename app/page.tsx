@@ -72,29 +72,29 @@ const EDITIONS = [
     number: "01",
     title: "LIVE AS SPOKEN",
     subtitle: "Real-time captions",
-    theme: "coral",
-    mark: "LIVE",
+    image: "/edition-live-v1.webp",
+    alt: "A tactile cream and coral hardback book with a retro caption television on its cover",
   },
   {
     number: "02",
     title: "TWO TONGUES",
     subtitle: "Nepali + Maithili",
-    theme: "cream",
-    mark: "दुई",
+    image: "/edition-languages-v1.webp",
+    alt: "A cream hardback book with two interlocking speech forms on its cover",
   },
   {
     number: "03",
     title: "CLEAR ENOUGH",
     subtitle: "Readable for everyone",
-    theme: "sage",
-    mark: "CC",
+    image: "/edition-access-v1.webp",
+    alt: "A sage hardback book with abstract listening and caption artwork on its cover",
   },
   {
     number: "04",
     title: "EVERY FRAME",
     subtitle: "Video without barriers",
-    theme: "ink",
-    mark: "PLAY",
+    image: "/edition-frame-v1.webp",
+    alt: "A black hardback book with a retro film frame and caption lines on its cover",
   },
 ] as const;
 
@@ -462,22 +462,23 @@ export default function Home() {
                 key={edition.title}
                 style={{ "--edition-index": index } as CSSProperties}
               >
-                <div className={`edition-book edition-book--${edition.theme}`}>
-                  <span className="edition-page-block" aria-hidden="true" />
-                  <span className="edition-bottom-pages" aria-hidden="true" />
-                  <span className="edition-spine" aria-hidden="true">
-                    <b>BOLI</b>
-                    <small>{edition.number}</small>
-                  </span>
+                <div className="edition-book-visual">
+                  <span className="edition-shadow" aria-hidden="true" />
+                  <Image
+                    className="edition-book-image"
+                    src={edition.image}
+                    alt={edition.alt}
+                    width={1024}
+                    height={1536}
+                    unoptimized
+                  />
+                </div>
 
-                  <div className="edition-cover">
-                    <span className="edition-number">{edition.number}</span>
-                    <span className="edition-mark">{edition.mark}</span>
-                    <div>
-                      <h3>{edition.title}</h3>
-                      <p>{edition.subtitle}</p>
-                    </div>
-                    <span className="edition-imprint">BOLI PRESS</span>
+                <div className="edition-label">
+                  <span>{edition.number}</span>
+                  <div>
+                    <h3>{edition.title}</h3>
+                    <p>{edition.subtitle}</p>
                   </div>
                 </div>
               </article>
