@@ -5,6 +5,10 @@
   --coral: #e15635;
   --border-coral: #d9431e;
   --ink: #11110c;
+  --frame-gap: 0.1rem;
+  --frame-border: 0.25rem;
+  --frame-radius: 1.8rem;
+  --rule-width: 0.3rem;
   --font-display: "Fraunces", "Bookman Old Style", Georgia, serif;
   --font-body: "DM Sans", Arial, sans-serif;
 }
@@ -56,14 +60,16 @@ a {
 
 .page {
   min-height: 100svh;
-  padding: 0.35rem;
+  padding: var(--frame-gap);
 }
 
 .site-shell {
-  min-height: calc(100svh - 0.7rem);
+  display: flex;
+  min-height: calc(100svh - (var(--frame-gap) * 2));
   overflow: hidden;
-  border: 0.55rem solid var(--border-coral);
-  border-radius: 2.35rem;
+  flex-direction: column;
+  border: var(--frame-border) solid var(--border-coral);
+  border-radius: var(--frame-radius);
   background: var(--ink);
 }
 
@@ -75,7 +81,7 @@ a {
   align-items: center;
   min-height: 6.25rem;
   padding: 0 5.4rem;
-  border-bottom: 0.3rem solid var(--ink);
+  border-bottom: var(--rule-width) solid var(--ink);
   background: var(--cream);
 }
 
@@ -148,15 +154,17 @@ a {
 
 .hero {
   display: grid;
+  flex: 1;
   grid-template-columns: 1.08fr 1fr;
-  min-height: calc(100svh - 10.6rem);
+  min-height: 0;
+  border-bottom: var(--rule-width) solid var(--ink);
 }
 
 .message-panel {
   display: grid;
   grid-template-rows: 1fr auto;
   min-width: 0;
-  border-right: 0.3rem solid var(--ink);
+  border-right: var(--rule-width) solid var(--ink);
   background: var(--cream);
 }
 
@@ -209,15 +217,79 @@ h1 span {
   background: var(--coral);
 }
 
-.reference-art {
+.artwork-motion,
+.reference-art,
+.cassette-motion {
   position: absolute;
   inset: 0;
   width: 100%;
-  max-width: none;
   height: 100%;
+}
+
+.artwork-motion {
+  will-change: transform;
+}
+
+.reference-art {
+  max-width: none;
   object-fit: cover;
   object-position: center;
+}
+
+.cassette-motion {
+  pointer-events: none;
+}
+
+.artwork-marker {
+  position: absolute;
+  top: var(--marker-y);
+  left: var(--marker-x);
+  width: var(--marker-width);
+  height: var(--marker-height);
+  transform: translate(-50%, -50%) rotate(var(--window-rotation, 0deg));
+}
+
+.reel-marker {
+  border-radius: 50%;
+  overflow: hidden;
+  opacity: 0.42;
+  mix-blend-mode: multiply;
+}
+
+.reel-disc {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  background:
+    repeating-conic-gradient(
+      from 0deg,
+      rgb(40 24 13 / 78%) 0deg 7deg,
+      transparent 7deg 29deg
+    );
   will-change: transform;
+}
+
+.tape-window {
+  overflow: hidden;
+  border-radius: 22%;
+  opacity: 0.48;
+  mix-blend-mode: soft-light;
+}
+
+.tape-strip {
+  display: block;
+  width: 180%;
+  height: 100%;
+  margin-left: -40%;
+  background:
+    repeating-linear-gradient(
+      100deg,
+      transparent 0 0.42rem,
+      rgb(255 221 171 / 62%) 0.42rem 0.54rem,
+      transparent 0.54rem 0.92rem
+    );
+  will-change: transform, opacity;
 }
 
 @keyframes film-grain {
@@ -349,7 +421,7 @@ h1 span {
   .message-panel {
     min-height: 44rem;
     border-right: 0;
-    border-bottom: 0.3rem solid var(--ink);
+    border-bottom: var(--rule-width) solid var(--ink);
   }
 
   .headline-box {
@@ -368,20 +440,20 @@ h1 span {
 }
 
 @media (max-width: 42rem) {
-  .page {
-    padding: 0.2rem;
+  :root {
+    --frame-gap: 0.05rem;
+    --frame-border: 0.2rem;
+    --frame-radius: 1.35rem;
+    --rule-width: 0.25rem;
   }
 
   .site-shell {
-    min-height: calc(100svh - 0.4rem);
-    border-width: 0.4rem;
-    border-radius: 1.65rem;
+    min-height: calc(100svh - (var(--frame-gap) * 2));
   }
 
   .navbar {
     min-height: 4.8rem;
     padding: 0 1.35rem;
-    border-bottom-width: 0.25rem;
   }
 
   .brand {
@@ -390,7 +462,6 @@ h1 span {
 
   .message-panel {
     min-height: 38rem;
-    border-bottom-width: 0.25rem;
   }
 
   .headline-box {
