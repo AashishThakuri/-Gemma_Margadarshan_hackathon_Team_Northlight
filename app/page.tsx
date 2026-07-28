@@ -377,44 +377,48 @@ export default function Home() {
         </section>
 
         <footer className="site-footer" id="contact">
-          <div className="footer-ticker" aria-hidden="true">
-            <div className="footer-ticker-track">
-              <span>NO WORD LEFT BEHIND</span>
-              <b>✦</b>
-              <span>NO MOMENT LOST</span>
-              <b>✦</b>
-              <span>NO WORD LEFT BEHIND</span>
-              <b>✦</b>
-              <span>NO MOMENT LOST</span>
-              <b>✦</b>
+          <div className="footer-caption-card">
+            <div className="footer-caption-meta">
+              <span>CC / FINAL FRAME</span>
+              <span>00:00:00</span>
             </div>
+            <p className="footer-caption-copy">
+              <span>THE VIDEO ENDS.</span>
+              <strong>THE WORDS STAY.</strong>
+              <i aria-hidden="true" />
+            </p>
           </div>
 
-          <div className="footer-stage">
-            <div className="footer-ending">
-              <p className="footer-timecode">FINAL FRAME / 00:00:00</p>
-              <h2>
-                THE END<span>?</span>
-              </h2>
-              <p className="footer-ending-copy">
-                Only for the video.
-                <strong> Understanding keeps playing.</strong>
-              </p>
-            </div>
-
-            <a className="footer-rewind" href="#home" aria-label="Back to top">
-              <span className="footer-rewind-disc" aria-hidden="true">
-                <i>↺</i>
-              </span>
-              <strong>REWIND TO THE TOP</strong>
-            </a>
-          </div>
+          <a className="footer-top-link" href="#home" aria-label="Back to start">
+            <span aria-hidden="true">↑</span>
+            <small>BACK TO START</small>
+          </a>
 
           <div className="footer-bottom">
             <p>© 2026 BOLI. ALL RIGHTS RESERVED.</p>
-            <p>CAPTIONS THAT ARRIVE WITH THE MOMENT.</p>
+            <p>LIVE CAPTIONS, RIGHT ON TIME.</p>
           </div>
         </footer>
+
+        <details className="floating-navigation">
+          <summary aria-label="Open page navigation">
+            <span />
+            <span />
+            <span />
+          </summary>
+          <nav aria-label="Floating page navigation">
+            <a href="#home" onClick={closeMobileMenu}>
+              <span>01</span>
+              HOME
+            </a>
+            {NAVIGATION.map((item, index) => (
+              <a href={item.href} key={item.href} onClick={closeMobileMenu}>
+                <span>{String(index + 2).padStart(2, "0")}</span>
+                {item.label}
+              </a>
+            ))}
+          </nav>
+        </details>
       </section>
     </main>
   );
