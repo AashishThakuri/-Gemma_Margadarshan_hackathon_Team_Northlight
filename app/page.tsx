@@ -2,8 +2,38 @@
 
 import Image from "next/image";
 import { animate, createScope } from "animejs";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import Lenis from "lenis";
 import { useEffect, useRef, useState } from "react";
 import type { CSSProperties, MouseEvent } from "react";
+
+const PRELOADER_WORDS = [
+  {
+    label: "BOLI.",
+    language: "IDENTITY",
+    color: "#11110c",
+    foreground: "#f3d9b9",
+  },
+  {
+    label: "सुन्नुहोस्",
+    language: "NEPALI / LISTEN",
+    color: "#d86f55",
+    foreground: "#11110c",
+  },
+  {
+    label: "सुनू",
+    language: "MAITHILI / LISTEN",
+    color: "#75b178",
+    foreground: "#11110c",
+  },
+  {
+    label: "UNDERSTAND.",
+    language: "EVERY MOMENT",
+    color: "#11110c",
+    foreground: "#f3d9b9",
+  },
+] as const;
 
 const ARTWORK_SIZE = { width: 783, height: 830 } as const;
 
@@ -101,10 +131,355 @@ function observeArtworkMarkers(
 }
 
 export default function Home() {
+  const pageRoot = useRef<HTMLElement>(null);
+  const preloaderRoot = useRef<HTMLDivElement>(null);
+  const preloaderCounter = useRef<HTMLSpanElement>(null);
   const artworkRoot = useRef<HTMLElement>(null);
   const aboutArtworkRoot = useRef<HTMLDivElement>(null);
   const heroRoot = useRef<HTMLDivElement>(null);
+  const [isPreloading, setIsPreloading] = useState(true);
   const [showFloatingNavigation, setShowFloatingNavigation] = useState(false);
+
+  useEffect(() => {
+    const root = preloaderRoot.current;
+    const counter = preloaderCounter.current;
+
+    if (!root || !counter) {
+      return;
+    }
+
+    gsap.registerPlugin(ScrollTrigger);
+    document.body.classList.add("is-loading");
+
+    const reducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    const progress = { value: 0 };
+
+    const context = gsap.context(() => {
+      const words = gsap.utils.toArray<HTMLElement>(".preloader-word");
+
+      gsap.set(words, {
+        autoAlpha: 0,
+        rotateX: -72,
+        yPercent: 125,
+        transformOrigin: "50% 100%",
+      });
+      gsap.set(words[0], { autoAlpha: 1, rotateX: 0, yPercent: 0 });
+
+      const timeline = gsap.timeline({
+        defaults: { ease: "power4.out" },
+        onComplete: () => {
+          document.body.classList.remove("is-loading");
+          setIsPreloading(false);
+        },
+      });
+
+      timeline
+        .to(
+          progress,
+          {
+            value: 100,
+            duration: reducedMotion ? 0.7 : 4.1,
+            ease: "power2.inOut",
+            onUpdate: () => {
+              counter.textContent = String(Math.round(progress.value)).padStart(
+                3,
+                "0",
+              );
+            },
+          },
+          0,
+        )
+        .to(
+          ".preloader-progress-fill",
+          {
+            scaleX: 1,
+            duration: reducedMotion ? 0.7 : 4.1,
+            ease: "power2.inOut",
+          },
+          0,
+        )
+        .to(
+          ".preloader-orbit",
+          {
+            rotate: reducedMotion ? 4 : 46,
+            duration: reducedMotion ? 0.7 : 4.1,
+            ease: "none",
+          },
+          0,
+        );
+
+      if (!reducedMotion) {
+        words.forEach((word, index) => {
+          if (index === 0) {
+            timeline.to(
+              word,
+              {
+                autoAlpha: 0,
+                rotateX: 54,
+                yPercent: -125,
+                duration: 0.58,
+                ease: "power3.in",
+              },
+              0.68,
+            );
+            return;
+          }
+
+          const revealAt = index * 0.86;
+          timeline
+            .to(
+              root,
+              {
+                backgroundColor: PRELOADER_WORDS[index].color,
+                color: PRELOADER_WORDS[index].foreground,
+                duration: 0.52,
+                ease: "power2.inOut",
+              },
+              revealAt - 0.2,
+            )
+            .to(
+              word,
+              {
+                autoAlpha: 1,
+                rotateX: 0,
+                yPercent: 0,
+                duration: 0.72,
+              },
+              revealAt,
+            );
+
+          if (index < words.length - 1) {
+            timeline.to(
+              word,
+              {
+                autoAlpha: 0,
+                rotateX: 54,
+                yPercent: -125,
+                duration: 0.58,
+                ease: "power3.in",
+              },
+              revealAt + 0.68,
+            );
+          }
+        });
+      } else {
+        timeline.set(words, { autoAlpha: 0 }, 0.55);
+        timeline.set(words.at(-1) ?? words[0], {
+          autoAlpha: 1,
+          rotateX: 0,
+          yPercent: 0,
+        });
+      }
+
+      timeline
+        .to(
+          ".preloader-orbit",
+          {
+            scale: 1.16,
+            duration: reducedMotion ? 0.25 : 0.8,
+            ease: "power3.inOut",
+          },
+          reducedMotion ? 0.55 : 3.15,
+        )
+        .to(
+          root,
+          {
+            clipPath: "inset(0 0 100% 0 round 0 0 48% 48%)",
+            duration: reducedMotion ? 0.3 : 0.95,
+            ease: "power4.inOut",
+          },
+          reducedMotion ? 0.7 : 3.65,
+        );
+    }, root);
+
+    return () => {
+      document.body.classList.remove("is-loading");
+      context.revert();
+    };
+  }, []);
+
+  useEffect(() => {
+    gsap.registerPlugin(ScrollTrigger);
+
+    const lenis = new Lenis({
+      duration: 1.15,
+      smoothWheel: true,
+      syncTouch: false,
+      touchMultiplier: 1.05,
+      wheelMultiplier: 0.86,
+    });
+
+    const updateScrollTrigger = () => ScrollTrigger.update();
+    const tick = (time: number) => lenis.raf(time * 1000);
+
+    lenis.on("scroll", updateScrollTrigger);
+    gsap.ticker.add(tick);
+    gsap.ticker.lagSmoothing(0);
+
+    if (isPreloading) {
+      lenis.stop();
+    } else {
+      lenis.start();
+      requestAnimationFrame(() => ScrollTrigger.refresh());
+    }
+
+    return () => {
+      lenis.off("scroll", updateScrollTrigger);
+      gsap.ticker.remove(tick);
+      lenis.destroy();
+    };
+  }, [isPreloading]);
+
+  useEffect(() => {
+    const root = pageRoot.current;
+
+    if (!root || isPreloading) {
+      return;
+    }
+
+    gsap.registerPlugin(ScrollTrigger);
+    const reducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+
+    if (reducedMotion) {
+      return;
+    }
+
+    const context = gsap.context(() => {
+      const opening = gsap.timeline({
+        defaults: { ease: "power4.out" },
+      });
+
+      opening
+        .fromTo(
+          ".navbar",
+          { clipPath: "inset(0 0 100% 0)" },
+          { clipPath: "inset(0 0 0% 0)", duration: 0.9 },
+          0,
+        )
+        .fromTo(
+          ".headline-box h1 > span > i",
+          { rotateX: -70, yPercent: 125 },
+          {
+            rotateX: 0,
+            yPercent: 0,
+            duration: 1.05,
+            stagger: 0.09,
+            transformOrigin: "50% 100%",
+          },
+          0.12,
+        )
+        .fromTo(
+          ".language-bar",
+          { clipPath: "inset(0 100% 0 0)" },
+          { clipPath: "inset(0 0% 0 0)", duration: 0.95 },
+          0.42,
+        )
+        .fromTo(
+          ".visual-panel",
+          { clipPath: "inset(0 0 100% 0)", filter: "saturate(.35)" },
+          {
+            clipPath: "inset(0 0 0% 0)",
+            filter: "saturate(1)",
+            duration: 1.25,
+          },
+          0.22,
+        );
+
+      gsap.fromTo(
+        ".about-heading h2 > span",
+        { rotateX: -68, yPercent: 120 },
+        {
+          rotateX: 0,
+          yPercent: 0,
+          duration: 1.05,
+          ease: "power4.out",
+          scrollTrigger: {
+            trigger: ".about-copy",
+            start: "top 72%",
+            once: true,
+          },
+        },
+      );
+
+      gsap.fromTo(
+        ".about-text p",
+        { clipPath: "inset(0 0 100% 0)", y: "2.4rem" },
+        {
+          clipPath: "inset(0 0 0% 0)",
+          y: 0,
+          duration: 0.95,
+          ease: "power3.out",
+          stagger: 0.16,
+          scrollTrigger: {
+            trigger: ".about-text",
+            start: "top 78%",
+            once: true,
+          },
+        },
+      );
+
+      gsap.fromTo(
+        ".features-heading h2 > span",
+        { rotateX: -68, yPercent: 120 },
+        {
+          rotateX: 0,
+          yPercent: 0,
+          duration: 1.05,
+          ease: "power4.out",
+          scrollTrigger: {
+            trigger: ".features-heading",
+            start: "top 74%",
+            once: true,
+          },
+        },
+      );
+
+      gsap.utils.toArray<HTMLElement>(".feature-row").forEach((row, index) => {
+        gsap.fromTo(
+          row.querySelectorAll("h3, p"),
+          {
+            clipPath: "inset(0 0 100% 0)",
+            y: "2rem",
+          },
+          {
+            clipPath: "inset(0 0 0% 0)",
+            y: 0,
+            duration: 0.82,
+            ease: "power3.out",
+            stagger: 0.11,
+            delay: index * 0.025,
+            scrollTrigger: {
+              trigger: row,
+              start: "top 86%",
+              once: true,
+            },
+          },
+        );
+      });
+
+      gsap.fromTo(
+        ".footer-brand-lockup h2",
+        { letterSpacing: "0.08em", opacity: 0 },
+        {
+          letterSpacing: "-0.075em",
+          opacity: 1,
+          duration: 1.05,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: ".site-footer",
+            start: "top 88%",
+            once: true,
+          },
+        },
+      );
+    }, root);
+
+    return () => context.revert();
+  }, [isPreloading]);
 
   useEffect(() => {
     const hero = heroRoot.current;
@@ -198,7 +573,57 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="page" id="home">
+    <main
+      className={`page${isPreloading ? " is-preloading" : ""}`}
+      id="home"
+      ref={pageRoot}
+    >
+      {isPreloading && (
+        <div
+          className="preloader"
+          ref={preloaderRoot}
+          role="status"
+          aria-label="Loading Boli"
+        >
+          <div className="preloader-meta">
+            <span>BOLI / LIVE CAPTION SYSTEM</span>
+            <span>LANGUAGE IS ARRIVING</span>
+          </div>
+
+          <div className="preloader-word-stage" aria-hidden="true">
+            {PRELOADER_WORDS.map((word) => (
+              <p className="preloader-word" key={word.label}>
+                <span>{word.label}</span>
+                <small>{word.language}</small>
+              </p>
+            ))}
+          </div>
+
+          <div className="preloader-orbit" aria-hidden="true">
+            <span style={{ "--orbit-angle": "-42deg" } as CSSProperties}>
+              HEAR
+            </span>
+            <span style={{ "--orbit-angle": "-14deg" } as CSSProperties}>
+              READ
+            </span>
+            <span style={{ "--orbit-angle": "14deg" } as CSSProperties}>
+              FOLLOW
+            </span>
+            <span style={{ "--orbit-angle": "42deg" } as CSSProperties}>
+              UNDERSTAND
+            </span>
+          </div>
+
+          <div className="preloader-progress">
+            <span ref={preloaderCounter}>000</span>
+            <div aria-hidden="true">
+              <i className="preloader-progress-fill" />
+            </div>
+            <span>100</span>
+          </div>
+        </div>
+      )}
+
       <section className="site-shell" aria-label="Boli live captioning">
         <header className="navbar">
           <a className="brand" href="#home" aria-label="Boli home">
@@ -240,10 +665,18 @@ export default function Home() {
           <section className="message-panel">
             <div className="headline-box">
               <h1>
-                <span>LIVE</span>
-                <span>CAPTIONS.</span>
-                <span>TWO</span>
-                <span>LANGUAGES.</span>
+                <span>
+                  <i>LIVE</i>
+                </span>
+                <span>
+                  <i>CAPTIONS.</i>
+                </span>
+                <span>
+                  <i>TWO</i>
+                </span>
+                <span>
+                  <i>LANGUAGES.</i>
+                </span>
               </h1>
             </div>
 
@@ -339,7 +772,9 @@ export default function Home() {
 
           <div className="about-copy">
             <div className="about-heading">
-              <h2 id="about-title">ABOUT</h2>
+              <h2 id="about-title">
+                <span>ABOUT</span>
+              </h2>
               <span aria-hidden="true">✦</span>
             </div>
 
@@ -365,7 +800,9 @@ export default function Home() {
         >
           <div className="features-copy">
             <header className="features-heading">
-              <h2 id="features-title">FEATURES</h2>
+              <h2 id="features-title">
+                <span>FEATURES</span>
+              </h2>
               <p>Live captions made to understand every moment.</p>
             </header>
 
