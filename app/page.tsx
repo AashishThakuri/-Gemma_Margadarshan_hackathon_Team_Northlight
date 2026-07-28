@@ -73,13 +73,6 @@ const FEATURES = [
       "Clear, readable captions designed so everyone can follow along.",
     imgSrc: "/feature-accessible-v1.png",
   },
-  {
-    number: "05",
-    heading: "PRIVATE & SECURE",
-    subheading:
-      "Your conversations remain encrypted, protected, and private.",
-    imgSrc: "/feature-private-v1.png",
-  },
 ] as const;
 
 function closeMobileMenu(event: MouseEvent<HTMLAnchorElement>) {
@@ -365,9 +358,6 @@ export default function Home() {
           <div className="features-copy">
             <header className="features-heading">
               <h2 id="features-title">FEATURES</h2>
-              <div className="features-rule" aria-hidden="true">
-                <span>✦</span>
-              </div>
               <p>Live captions made to understand every moment.</p>
             </header>
 
@@ -383,6 +373,7 @@ export default function Home() {
               height={1254}
               unoptimized
             />
+            <span className="feature-disc-motion" aria-hidden="true" />
           </div>
         </section>
       </section>

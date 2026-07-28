@@ -1,6 +1,5 @@
 "use client";
 
-import { ArrowRight } from "lucide-react";
 import {
   motion,
   useMotionValue,
@@ -48,8 +47,8 @@ function InteractiveFeatureRow({
   const pointerY = useMotionValue(0);
   const springX = useSpring(pointerX, { damping: 22, stiffness: 190 });
   const springY = useSpring(pointerY, { damping: 22, stiffness: 190 });
-  const previewLeft = useTransform(springX, [-0.5, 0.5], ["43%", "67%"]);
-  const previewTop = useTransform(springY, [-0.5, 0.5], ["30%", "70%"]);
+  const previewLeft = useTransform(springX, [-0.5, 0.5], ["85%", "91%"]);
+  const previewTop = useTransform(springY, [-0.5, 0.5], ["43%", "57%"]);
 
   const handlePointerMove = (
     event: MouseEvent<HTMLAnchorElement, globalThis.MouseEvent>,
@@ -112,18 +111,6 @@ function InteractiveFeatureRow({
           hover: { opacity: 1, rotate: 5, scale: 1 },
         }}
       />
-
-      <motion.span
-        aria-hidden="true"
-        className="interactive-feature-arrow"
-        variants={{
-          rest: { opacity: 0, x: 18 },
-          hover: { opacity: 1, x: 0 },
-        }}
-        transition={{ type: "spring", damping: 18, stiffness: 240 }}
-      >
-        <ArrowRight />
-      </motion.span>
     </motion.a>
   );
 }
