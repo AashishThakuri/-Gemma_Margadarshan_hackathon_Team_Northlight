@@ -96,16 +96,6 @@ export default function Home() {
     }
 
     const scope = createScope({ root }).add(() => {
-      animate(".artwork-motion", {
-        y: ["-0.18rem", "0.22rem"],
-        rotate: [-0.22, 0.22],
-        scale: [1.006, 1.014],
-        duration: 4800,
-        ease: "inOutSine",
-        alternate: true,
-        loop: true,
-      });
-
       animate(".reel-disc", {
         rotate: "1turn",
         duration: 2600,
