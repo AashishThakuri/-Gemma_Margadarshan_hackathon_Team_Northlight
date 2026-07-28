@@ -4,6 +4,7 @@ import Image from "next/image";
 import { animate, createScope } from "animejs";
 import { useEffect, useRef } from "react";
 import type { CSSProperties, MouseEvent } from "react";
+import { InteractiveHoverLinks } from "@/components/ui/interactive-hover-links";
 
 const ARTWORK_SIZE = { width: 783, height: 830 } as const;
 
@@ -46,33 +47,38 @@ const NAVIGATION = [
 const FEATURES = [
   {
     number: "01",
-    title: "REAL-TIME CAPTIONS",
-    description:
+    heading: "REAL-TIME CAPTIONS",
+    subheading:
       "See every word as it happens with ultra-low delay, so you never miss a thing.",
+    imgSrc: "/feature-real-time-v1.png",
   },
   {
     number: "02",
-    title: "HIGH ACCURACY",
-    description:
+    heading: "HIGH ACCURACY",
+    subheading:
       "AI-powered precision designed to understand context, not just words.",
+    imgSrc: "/feature-accuracy-v1.png",
   },
   {
     number: "03",
-    title: "MULTI-LANGUAGE",
-    description:
+    heading: "MULTI-LANGUAGE",
+    subheading:
       "Built for seamless Nepali and Maithili conversations across every kind of video.",
+    imgSrc: "/feature-multilanguage-v1.png",
   },
   {
     number: "04",
-    title: "ACCESSIBLE FOR ALL",
-    description:
+    heading: "ACCESSIBLE FOR ALL",
+    subheading:
       "Clear, readable captions designed so everyone can follow along.",
+    imgSrc: "/feature-accessible-v1.png",
   },
   {
     number: "05",
-    title: "PRIVATE & SECURE",
-    description:
+    heading: "PRIVATE & SECURE",
+    subheading:
       "Your conversations remain encrypted, protected, and private.",
+    imgSrc: "/feature-private-v1.png",
   },
 ] as const;
 
@@ -365,17 +371,7 @@ export default function Home() {
               <p>Live captions made to understand every moment.</p>
             </header>
 
-            <ol className="features-list">
-              {FEATURES.map((feature) => (
-                <li key={feature.number}>
-                  <span className="feature-number">{feature.number}</span>
-                  <div>
-                    <h3>{feature.title}</h3>
-                    <p>{feature.description}</p>
-                  </div>
-                </li>
-              ))}
-            </ol>
+            <InteractiveHoverLinks links={FEATURES} />
           </div>
 
           <div className="features-visual">
