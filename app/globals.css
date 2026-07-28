@@ -321,6 +321,12 @@ h1 span {
   object-position: center;
 }
 
+.about-cassette-motion {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
 .about-copy {
   display: flex;
   min-width: 0;

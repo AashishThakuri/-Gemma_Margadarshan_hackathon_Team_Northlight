@@ -22,6 +22,20 @@ const CASSETTE_WINDOWS = [
   { id: "bottom", x: 366, y: 672, width: 68, height: 37, rotate: 4 },
 ] as const;
 
+const ABOUT_ARTWORK_SIZE = { width: 1295, height: 1216 } as const;
+
+const ABOUT_CASSETTE_REELS = [
+  { id: "left", x: 490, y: 620, size: 82 },
+  { id: "right", x: 793, y: 620, size: 82 },
+] as const;
+
+const ABOUT_CASSETTE_WINDOW = {
+  x: 642,
+  y: 620,
+  width: 150,
+  height: 70,
+} as const;
+
 const NAVIGATION = [
   { label: "ABOUT", href: "#about" },
   { label: "FEATURES", href: "#features" },
@@ -33,8 +47,40 @@ function closeMobileMenu(event: MouseEvent<HTMLAnchorElement>) {
   event.currentTarget.closest("details")?.removeAttribute("open");
 }
 
+function observeArtworkMarkers(
+  root: HTMLElement,
+  artworkSize: { width: number; height: number },
+) {
+  const syncArtworkMarkers = () => {
+    const scale = Math.max(
+      root.clientWidth / artworkSize.width,
+      root.clientHeight / artworkSize.height,
+    );
+    const offsetX = (root.clientWidth - artworkSize.width * scale) / 2;
+    const offsetY = (root.clientHeight - artworkSize.height * scale) / 2;
+
+    root.querySelectorAll<HTMLElement>("[data-art-x]").forEach((marker) => {
+      const x = Number(marker.dataset.artX);
+      const y = Number(marker.dataset.artY);
+      const width = Number(marker.dataset.artWidth ?? marker.dataset.artSize);
+      const height = Number(marker.dataset.artHeight ?? marker.dataset.artSize);
+
+      marker.style.setProperty("--marker-x", `${offsetX + x * scale}px`);
+      marker.style.setProperty("--marker-y", `${offsetY + y * scale}px`);
+      marker.style.setProperty("--marker-width", `${width * scale}px`);
+      marker.style.setProperty("--marker-height", `${height * scale}px`);
+    });
+  };
+
+  syncArtworkMarkers();
+  const markerObserver = new ResizeObserver(syncArtworkMarkers);
+  markerObserver.observe(root);
+  return markerObserver;
+}
+
 export default function Home() {
   const artworkRoot = useRef<HTMLElement>(null);
+  const aboutArtworkRoot = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const root = artworkRoot.current;
@@ -43,30 +89,7 @@ export default function Home() {
       return;
     }
 
-    const syncArtworkMarkers = () => {
-      const scale = Math.max(
-        root.clientWidth / ARTWORK_SIZE.width,
-        root.clientHeight / ARTWORK_SIZE.height,
-      );
-      const offsetX = (root.clientWidth - ARTWORK_SIZE.width * scale) / 2;
-      const offsetY = (root.clientHeight - ARTWORK_SIZE.height * scale) / 2;
-
-      root.querySelectorAll<HTMLElement>("[data-art-x]").forEach((marker) => {
-        const x = Number(marker.dataset.artX);
-        const y = Number(marker.dataset.artY);
-        const width = Number(marker.dataset.artWidth ?? marker.dataset.artSize);
-        const height = Number(marker.dataset.artHeight ?? marker.dataset.artSize);
-
-        marker.style.setProperty("--marker-x", `${offsetX + x * scale}px`);
-        marker.style.setProperty("--marker-y", `${offsetY + y * scale}px`);
-        marker.style.setProperty("--marker-width", `${width * scale}px`);
-        marker.style.setProperty("--marker-height", `${height * scale}px`);
-      });
-    };
-
-    syncArtworkMarkers();
-    const markerObserver = new ResizeObserver(syncArtworkMarkers);
-    markerObserver.observe(root);
+    const markerObserver = observeArtworkMarkers(root, ARTWORK_SIZE);
 
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       return () => markerObserver.disconnect();
@@ -95,6 +118,43 @@ export default function Home() {
         opacity: [0.25, 0.72, 0.25],
         duration: 1800,
         delay: (_, index) => index * 240,
+        ease: "inOutSine",
+        alternate: true,
+        loop: true,
+      });
+    });
+
+    return () => {
+      markerObserver.disconnect();
+      scope.revert();
+    };
+  }, []);
+
+  useEffect(() => {
+    const root = aboutArtworkRoot.current;
+
+    if (!root) {
+      return;
+    }
+
+    const markerObserver = observeArtworkMarkers(root, ABOUT_ARTWORK_SIZE);
+
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      return () => markerObserver.disconnect();
+    }
+
+    const scope = createScope({ root }).add(() => {
+      animate(".reel-disc", {
+        rotate: "1turn",
+        duration: 2300,
+        ease: "linear",
+        loop: true,
+      });
+
+      animate(".tape-strip", {
+        x: ["-42%", "42%"],
+        opacity: [0.28, 0.78, 0.28],
+        duration: 1700,
         ease: "inOutSine",
         alternate: true,
         loop: true,
@@ -213,7 +273,7 @@ export default function Home() {
         </div>
 
         <section className="about-section" id="about" aria-labelledby="about-title">
-          <div className="about-visual">
+          <div className="about-visual" ref={aboutArtworkRoot}>
             <Image
               className="about-image"
               src="/about-section-image.png"
@@ -222,6 +282,30 @@ export default function Home() {
               height={1216}
               unoptimized
             />
+
+            <div className="about-cassette-motion" aria-hidden="true">
+              {ABOUT_CASSETTE_REELS.map((reel) => (
+                <span
+                  className="artwork-marker reel-marker"
+                  data-art-x={reel.x}
+                  data-art-y={reel.y}
+                  data-art-size={reel.size}
+                  key={reel.id}
+                >
+                  <span className="reel-disc" />
+                </span>
+              ))}
+
+              <span
+                className="artwork-marker tape-window"
+                data-art-x={ABOUT_CASSETTE_WINDOW.x}
+                data-art-y={ABOUT_CASSETTE_WINDOW.y}
+                data-art-width={ABOUT_CASSETTE_WINDOW.width}
+                data-art-height={ABOUT_CASSETTE_WINDOW.height}
+              >
+                <span className="tape-strip" />
+              </span>
+            </div>
           </div>
 
           <div className="about-copy">
