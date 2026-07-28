@@ -18,6 +18,7 @@
   );
   --font-display: "Fraunces", "Bookman Old Style", Georgia, serif;
   --font-body: "DM Sans", Arial, sans-serif;
+  --font-mono: "Courier New", Courier, monospace;
 }
 
 * {
@@ -480,6 +481,7 @@ h1 span {
 .features-list p {
   max-width: 31rem;
   margin: 0.4rem 0 0;
+  font-family: var(--font-mono);
   font-size: clamp(0.96rem, 1.2vw, 1.25rem);
   letter-spacing: -0.025em;
   line-height: 1.3;
