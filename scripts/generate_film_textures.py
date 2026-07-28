@@ -5,6 +5,7 @@ from PIL import Image, ImageFilter
 
 
 OUTPUT_DIR = Path(__file__).resolve().parents[1] / "public"
+SOURCE_DIR = Path(__file__).resolve().parent / "assets"
 random.seed(35)
 
 grain_size = 384
@@ -26,3 +27,9 @@ for _ in range(grain_size * grain_size):
 grain.putdata(grain_pixels)
 grain = grain.filter(ImageFilter.GaussianBlur(0.18))
 grain.save(OUTPUT_DIR / "film-grain-35mm.png", optimize=True)
+
+poster = Image.open(SOURCE_DIR / "poster-reference.png")
+poster.crop((910, 40, 1693, 870)).save(
+    OUTPUT_DIR / "poster-art-right.png",
+    optimize=True,
+)

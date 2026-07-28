@@ -73,10 +73,10 @@ export default function Home() {
           <section className="visual-panel" id="features" aria-label="Live caption visual">
             <Image
               className="reference-art"
-              src="/poster-reference.png"
+              src="/poster-art-right.png"
               alt="Three oversized retro cassette tapes over a cream flower"
-              width={1731}
-              height={909}
+              width={783}
+              height={830}
               priority
               unoptimized
             />
