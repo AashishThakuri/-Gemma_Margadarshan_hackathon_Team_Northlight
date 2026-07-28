@@ -153,7 +153,7 @@ export default function Home() {
 
       animate(".tape-strip", {
         x: ["-42%", "42%"],
-        opacity: [0.48, 1, 0.48],
+        opacity: [0.28, 0.78, 0.28],
         duration: 1700,
         ease: "inOutSine",
         alternate: true,
@@ -286,7 +286,7 @@ export default function Home() {
             <div className="about-cassette-motion" aria-hidden="true">
               {ABOUT_CASSETTE_REELS.map((reel) => (
                 <span
-                  className="artwork-marker reel-marker about-reel-marker"
+                  className="artwork-marker reel-marker"
                   data-art-x={reel.x}
                   data-art-y={reel.y}
                   data-art-size={reel.size}
@@ -297,7 +297,7 @@ export default function Home() {
               ))}
 
               <span
-                className="artwork-marker tape-window about-tape-window"
+                className="artwork-marker tape-window"
                 data-art-x={ABOUT_CASSETTE_WINDOW.x}
                 data-art-y={ABOUT_CASSETTE_WINDOW.y}
                 data-art-width={ABOUT_CASSETTE_WINDOW.width}
