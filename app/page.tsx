@@ -1,6 +1,8 @@
 "use client";
 
 import Image from "next/image";
+import { animate, createScope } from "animejs";
+import { useEffect, useRef } from "react";
 import type { MouseEvent } from "react";
 
 const NAVIGATION = [
@@ -15,6 +17,30 @@ function closeMobileMenu(event: MouseEvent<HTMLAnchorElement>) {
 }
 
 export default function Home() {
+  const artworkRoot = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const root = artworkRoot.current;
+
+    if (!root || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      return;
+    }
+
+    const scope = createScope({ root }).add(() => {
+      animate(".reference-art", {
+        y: ["-0.25rem", "0.3rem"],
+        rotate: [-0.35, 0.35],
+        scale: [1.012, 1.025],
+        duration: 4500,
+        ease: "inOutSine",
+        alternate: true,
+        loop: true,
+      });
+    });
+
+    return () => scope.revert();
+  }, []);
+
   return (
     <main className="page" id="home">
       <section className="site-shell" aria-label="Boli live captioning">
@@ -70,7 +96,12 @@ export default function Home() {
             </a>
           </section>
 
-          <section className="visual-panel" id="features" aria-label="Live caption visual">
+          <section
+            className="visual-panel"
+            id="features"
+            aria-label="Live caption visual"
+            ref={artworkRoot}
+          >
             <Image
               className="reference-art"
               src="/poster-art-right.png"
