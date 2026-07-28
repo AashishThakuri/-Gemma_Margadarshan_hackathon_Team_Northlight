@@ -57,39 +57,23 @@ export default function Home() {
         </header>
 
         <div className="hero">
-          <div className="hero-copy" id="about">
-            <div className="headline-wrap">
-              <p className="eyebrow">LIVE CAPTIONS • दुई भाषा • TWO LANGUAGES</p>
+          <section className="message-panel" id="about">
+            <div className="headline-box">
               <h1>
-                CAPTIONS
-                <br />
-                THAT SPEAK
-                <br />
-                YOUR
-                <br />
-                LANGUAGE.
+                <span>LIVE</span>
+                <span>CAPTIONS.</span>
+                <span>TWO</span>
+                <span>LANGUAGES.</span>
               </h1>
-
-              <a className="language-disc" href="#languages" aria-label="Nepali and Maithili">
-                <span>NEPALI</span>
-                <span>+ MAITHILI</span>
-              </a>
             </div>
 
-            <p className="intro">
-              Live captions that listen, understand, and keep up—bringing every
-              Nepali and Maithili voice clearly onto the screen.
-            </p>
-          </div>
+            <a className="language-bar" id="languages" href="#features">
+              NEPALI + MAITHILI
+            </a>
+          </section>
 
-          <div className="visual-panel" id="features">
-            <div className="panel-stamp" aria-hidden="true">
-              <span>LISTEN</span>
-              <span>UNDERSTAND</span>
-              <span>CAPTION</span>
-            </div>
-
-            <div className="flower-frame" aria-hidden="true">
+          <section className="visual-panel" id="features" aria-label="Live caption visual">
+            <div className="flower-art" aria-hidden="true">
               <div className="petals">
                 {FLOWER_PETALS.map((angle) => (
                   <span
@@ -99,24 +83,19 @@ export default function Home() {
                   />
                 ))}
               </div>
-              <div className="image-glow" />
+
+              <div className="cassette-shadow" />
               <Image
                 className="hero-image"
                 src="/Hero-section-image.png"
-                alt="Three retro cassette tapes floating together"
+                alt="Three retro cassette tapes in black, red, and cream"
                 width={1024}
                 height={1536}
                 priority
                 unoptimized
               />
             </div>
-
-            <div className="language-key" id="languages">
-              <span>नेपाली</span>
-              <i aria-hidden="true" />
-              <span>मैथिली</span>
-            </div>
-          </div>
+          </section>
         </div>
       </section>
     </main>
