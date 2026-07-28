@@ -379,7 +379,7 @@ export default function Home() {
           scrollTrigger: {
             trigger: ".about-copy",
             start: "top 72%",
-            once: true,
+            toggleActions: "restart none restart reverse",
           },
         },
       );
@@ -396,7 +396,7 @@ export default function Home() {
           scrollTrigger: {
             trigger: ".about-text",
             start: "top 78%",
-            once: true,
+            toggleActions: "restart none restart reverse",
           },
         },
       );
@@ -412,7 +412,7 @@ export default function Home() {
           scrollTrigger: {
             trigger: ".features-heading",
             start: "top 74%",
-            once: true,
+            toggleActions: "restart none restart reverse",
           },
         },
       );
@@ -434,7 +434,7 @@ export default function Home() {
             scrollTrigger: {
               trigger: row,
               start: "top 86%",
-              once: true,
+              toggleActions: "restart none restart reverse",
             },
           },
         );
@@ -451,7 +451,7 @@ export default function Home() {
           scrollTrigger: {
             trigger: ".site-footer",
             start: "top 88%",
-            once: true,
+            toggleActions: "restart none restart reverse",
           },
         },
       );

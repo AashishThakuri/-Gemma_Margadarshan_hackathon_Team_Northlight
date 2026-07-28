@@ -705,10 +705,9 @@ h1 span i {
   opacity: 1;
   pointer-events: none;
   backface-visibility: hidden;
-  contain: strict;
-  transform: translateZ(0);
+  transform-origin: 50% 50%;
   will-change: transform;
-  animation: feature-disc-spin 4.8s linear infinite;
+  animation: feature-disc-spin 4.2s linear infinite both;
 }
 
 .site-footer {
@@ -968,8 +967,12 @@ h1 span i {
 }
 
 @keyframes feature-disc-spin {
+  from {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+
   to {
-    transform: rotate(1turn);
+    transform: translate3d(0, 0, 0) rotate(1turn);
   }
 }
 
