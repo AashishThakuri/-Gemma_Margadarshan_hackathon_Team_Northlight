@@ -43,6 +43,39 @@ const NAVIGATION = [
   { label: "CONTACT", href: "mailto:hello@boli.live" },
 ];
 
+const FEATURES = [
+  {
+    number: "01",
+    title: "REAL-TIME CAPTIONS",
+    description:
+      "See every word as it happens with ultra-low delay, so you never miss a thing.",
+  },
+  {
+    number: "02",
+    title: "HIGH ACCURACY",
+    description:
+      "AI-powered precision designed to understand context, not just words.",
+  },
+  {
+    number: "03",
+    title: "MULTI-LANGUAGE",
+    description:
+      "Built for seamless Nepali and Maithili conversations across every kind of video.",
+  },
+  {
+    number: "04",
+    title: "ACCESSIBLE FOR ALL",
+    description:
+      "Clear, readable captions designed so everyone can follow along.",
+  },
+  {
+    number: "05",
+    title: "PRIVATE & SECURE",
+    description:
+      "Your conversations remain encrypted, protected, and private.",
+  },
+] as const;
+
 function closeMobileMenu(event: MouseEvent<HTMLAnchorElement>) {
   event.currentTarget.closest("details")?.removeAttribute("open");
 }
@@ -214,7 +247,6 @@ export default function Home() {
 
           <section
             className="visual-panel"
-            id="features"
             aria-label="Live caption visual"
             ref={artworkRoot}
           >
@@ -316,6 +348,45 @@ export default function Home() {
                 inclusive, and accessible wherever people press play.
               </p>
             </div>
+          </div>
+        </section>
+
+        <section
+          className="features-section"
+          id="features"
+          aria-labelledby="features-title"
+        >
+          <div className="features-copy">
+            <header className="features-heading">
+              <h2 id="features-title">FEATURES</h2>
+              <div className="features-rule" aria-hidden="true">
+                <span>✦</span>
+              </div>
+              <p>Live captions made to understand every moment.</p>
+            </header>
+
+            <ol className="features-list">
+              {FEATURES.map((feature) => (
+                <li key={feature.number}>
+                  <span className="feature-number">{feature.number}</span>
+                  <div>
+                    <h3>{feature.title}</h3>
+                    <p>{feature.description}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </div>
+
+          <div className="features-visual">
+            <Image
+              className="features-image"
+              src="/feature-section-image.png"
+              alt="A restored vintage typewriter viewed from above"
+              width={1295}
+              height={1216}
+              unoptimized
+            />
           </div>
         </section>
       </section>
