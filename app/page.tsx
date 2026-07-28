@@ -419,10 +419,8 @@ export default function Home() {
         {showFloatingNavigation && (
           <details className="floating-navigation">
             <summary aria-label="Open page navigation">
-              <span className="floating-navigation-icon" aria-hidden="true">
-                <i />
-                <i />
-              </span>
+              <span aria-hidden="true" />
+              <span aria-hidden="true" />
             </summary>
             <nav aria-label="Floating page navigation">
               <a href="#home" onClick={closeMobileMenu}>
