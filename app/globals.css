@@ -486,17 +486,17 @@ h1 span {
   background: conic-gradient(
     from 22deg,
     transparent 0 15%,
-    rgb(243 217 185 / 16%) 17%,
-    rgb(243 217 185 / 34%) 20%,
-    rgb(243 217 185 / 18%) 23%,
+    rgb(243 217 185 / 20%) 17%,
+    rgb(243 217 185 / 40%) 20%,
+    rgb(243 217 185 / 22%) 23%,
     transparent 27% 56%,
-    rgb(243 217 185 / 12%) 58%,
-    rgb(243 217 185 / 23%) 61%,
+    rgb(243 217 185 / 15%) 58%,
+    rgb(243 217 185 / 28%) 61%,
     transparent 65%
   );
   filter: blur(0.35rem);
   mix-blend-mode: soft-light;
-  opacity: 0.95;
+  opacity: 1;
   pointer-events: none;
   will-change: transform;
   animation: feature-disc-spin 4.8s linear infinite;
