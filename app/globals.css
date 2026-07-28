@@ -6,6 +6,7 @@
   --border-coral: #d9431e;
   --sage: #8fb785;
   --ink: #11110c;
+  --pure-black: #000;
   --frame-gap: 0.1rem;
   --frame-border: 0.25rem;
   --frame-radius: 1.8rem;
@@ -486,9 +487,10 @@ h1 span {
 
 .features-visual {
   position: relative;
+  z-index: 101;
   min-width: 0;
   overflow: hidden;
-  background: var(--ink);
+  background: var(--pure-black);
 }
 
 .features-image {
