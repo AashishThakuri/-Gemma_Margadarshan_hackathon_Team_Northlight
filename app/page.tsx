@@ -242,7 +242,7 @@ export default function Home() {
               <div className="cassette-motion" aria-hidden="true">
                 {CASSETTE_REELS.map((reel) => (
                   <span
-                    className="artwork-marker reel-marker"
+                    className="artwork-marker reel-marker landing-reel-marker"
                     data-art-x={reel.x}
                     data-art-y={reel.y}
                     data-art-size={reel.size}

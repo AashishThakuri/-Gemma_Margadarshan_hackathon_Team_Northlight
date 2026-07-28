@@ -275,6 +275,19 @@ h1 span {
   will-change: transform;
 }
 
+.landing-reel-marker {
+  opacity: 0.72;
+}
+
+.landing-reel-marker .reel-disc {
+  background:
+    repeating-conic-gradient(
+      from 0deg,
+      rgb(28 17 10 / 92%) 0deg 8deg,
+      transparent 8deg 28deg
+    );
+}
+
 .tape-window {
   overflow: hidden;
   border-radius: 22%;
