@@ -39,7 +39,7 @@ const ABOUT_CASSETTE_WINDOW = {
 const NAVIGATION = [
   { label: "ABOUT", href: "#about" },
   { label: "FEATURES", href: "#features" },
-  { label: "ARCHIVE", href: "#archive" },
+  { label: "EDITIONS", href: "#editions" },
   { label: "LANGUAGES", href: "#languages" },
   { label: "CONTACT", href: "mailto:hello@boli.live" },
 ];
@@ -64,6 +64,37 @@ const FEATURES = [
     heading: "ACCESSIBLE FOR ALL",
     subheading:
       "Clear, readable captions designed so everyone can follow along.",
+  },
+] as const;
+
+const EDITIONS = [
+  {
+    number: "01",
+    title: "LIVE AS SPOKEN",
+    subtitle: "Real-time captions",
+    theme: "coral",
+    mark: "LIVE",
+  },
+  {
+    number: "02",
+    title: "TWO TONGUES",
+    subtitle: "Nepali + Maithili",
+    theme: "cream",
+    mark: "दुई",
+  },
+  {
+    number: "03",
+    title: "CLEAR ENOUGH",
+    subtitle: "Readable for everyone",
+    theme: "sage",
+    mark: "CC",
+  },
+  {
+    number: "04",
+    title: "EVERY FRAME",
+    subtitle: "Video without barriers",
+    theme: "ink",
+    mark: "PLAY",
   },
 ] as const;
 
@@ -105,7 +136,7 @@ function observeArtworkMarkers(
 export default function Home() {
   const artworkRoot = useRef<HTMLElement>(null);
   const aboutArtworkRoot = useRef<HTMLDivElement>(null);
-  const archiveRoot = useRef<HTMLElement>(null);
+  const editionsRoot = useRef<HTMLElement>(null);
 
   useEffect(() => {
     const root = artworkRoot.current;
@@ -146,23 +177,23 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    const root = archiveRoot.current;
+    const root = editionsRoot.current;
 
     if (!root) {
       return;
     }
 
-    const revealArchive = () => root.classList.add("is-visible");
+    const revealEditions = () => root.classList.add("is-visible");
 
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      revealArchive();
+      revealEditions();
       return;
     }
 
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          revealArchive();
+          revealEditions();
           observer.disconnect();
         }
       },
@@ -408,55 +439,49 @@ export default function Home() {
         </section>
 
         <section
-          className="archive-section"
-          id="archive"
-          aria-labelledby="archive-title"
-          ref={archiveRoot}
+          className="editions-section"
+          id="editions"
+          aria-labelledby="editions-title"
+          ref={editionsRoot}
         >
-          <div className="archive-stage">
-            <p className="archive-kicker">VOLUME 01 / BOLI</p>
-
-            <div className="archive-book" aria-label="The Caption Archive book">
-              <div className="archive-spread" aria-hidden="true">
-                <article className="archive-page archive-page-left">
-                  <span className="archive-page-number">01</span>
-                  <p className="archive-page-label">LISTENING NOTES</p>
-                  <h2 id="archive-title">
-                    EVERY WORD
-                    <br />
-                    BELONGS
-                    <br />
-                    IN FRAME.
-                  </h2>
-                  <span className="archive-spark">✦</span>
-                </article>
-
-                <article className="archive-page archive-page-right">
-                  <span className="archive-page-number">02</span>
-                  <p className="archive-page-label">TWO LANGUAGES / ONE MOMENT</p>
-                  <p className="archive-language">नेपाली + मैथिली</p>
-                  <p className="archive-caption-copy">
-                    Boli catches the moment as it happens and gives every voice
-                    a place to land.
-                  </p>
-                  <span className="archive-live">LIVE / 00:01:24</span>
-                </article>
-              </div>
-
-              <article className="archive-cover" aria-hidden="true">
-                <span className="archive-cover-volume">BOLI / VOL. 01</span>
-                <p>THE</p>
-                <h2>CAPTION</h2>
-                <h2>ARCHIVE</h2>
-                <span className="archive-cover-rule" />
-                <span className="archive-cover-language">NEPALI + MAITHILI</span>
-                <span className="archive-cover-star">✦</span>
-              </article>
-
-              <span className="archive-spine" aria-hidden="true" />
+          <header className="editions-heading">
+            <div>
+              <p>BOLI / LANGUAGE COLLECTION</p>
+              <h2 id="editions-title">BOLI EDITIONS</h2>
             </div>
+            <p>
+              Four pocket-sized stories about keeping every voice in the
+              frame.
+            </p>
+          </header>
 
-            <p className="archive-status">OPENING THE ARCHIVE</p>
+          <div className="editions-shelf">
+            {EDITIONS.map((edition, index) => (
+              <article
+                className="edition-card"
+                key={edition.title}
+                style={{ "--edition-index": index } as CSSProperties}
+              >
+                <div className={`edition-book edition-book--${edition.theme}`}>
+                  <span className="edition-page-block" aria-hidden="true" />
+                  <span className="edition-bottom-pages" aria-hidden="true" />
+                  <span className="edition-spine" aria-hidden="true">
+                    <b>BOLI</b>
+                    <small>{edition.number}</small>
+                  </span>
+
+                  <div className="edition-cover">
+                    <span className="edition-number">{edition.number}</span>
+                    <span className="edition-mark">{edition.mark}</span>
+                    <div>
+                      <h3>{edition.title}</h3>
+                      <p>{edition.subtitle}</p>
+                    </div>
+                    <span className="edition-imprint">BOLI PRESS</span>
+                  </div>
+                </div>
+              </article>
+            ))}
           </div>
         </section>
       </section>
