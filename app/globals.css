@@ -484,27 +484,22 @@ h1 span {
   aspect-ratio: 1;
   border-radius: 50%;
   background: conic-gradient(
-    from 25deg,
-    transparent 0 18%,
-    rgb(243 217 185 / 22%) 20%,
-    transparent 24% 58%,
-    rgb(243 217 185 / 15%) 60%,
-    transparent 64%
+    from 22deg,
+    transparent 0 15%,
+    rgb(243 217 185 / 12%) 17%,
+    rgb(243 217 185 / 28%) 20%,
+    rgb(243 217 185 / 14%) 23%,
+    transparent 27% 56%,
+    rgb(243 217 185 / 9%) 58%,
+    rgb(243 217 185 / 18%) 61%,
+    transparent 65%
   );
+  filter: blur(0.35rem);
   mix-blend-mode: soft-light;
+  opacity: 0.9;
   pointer-events: none;
-  animation: feature-disc-spin 5.5s linear infinite;
-}
-
-.feature-disc-motion::after {
-  position: absolute;
-  top: 12%;
-  left: 50%;
-  width: 0.45rem;
-  aspect-ratio: 1;
-  border-radius: 50%;
-  background: rgb(243 217 185 / 55%);
-  content: "";
+  will-change: transform;
+  animation: feature-disc-spin 4.8s linear infinite;
 }
 
 @keyframes feature-disc-spin {
