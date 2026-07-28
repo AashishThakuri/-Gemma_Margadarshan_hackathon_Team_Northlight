@@ -233,6 +233,7 @@ h1 span {
 
 .reference-art {
   max-width: none;
+  clip-path: inset(0 1.25rem 0 0);
   object-fit: cover;
   object-position: center;
 }
