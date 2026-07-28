@@ -39,7 +39,6 @@ const ABOUT_CASSETTE_WINDOW = {
 const NAVIGATION = [
   { label: "ABOUT", href: "#about" },
   { label: "FEATURES", href: "#features" },
-  { label: "EDITIONS", href: "#editions" },
   { label: "LANGUAGES", href: "#languages" },
   { label: "CONTACT", href: "mailto:hello@boli.live" },
 ];
@@ -64,37 +63,6 @@ const FEATURES = [
     heading: "ACCESSIBLE FOR ALL",
     subheading:
       "Clear, readable captions designed so everyone can follow along.",
-  },
-] as const;
-
-const EDITIONS = [
-  {
-    number: "01",
-    title: "LIVE AS SPOKEN",
-    subtitle: "Real-time captions",
-    image: "/edition-live-v1.webp",
-    alt: "A tactile cream and coral hardback book with a retro caption television on its cover",
-  },
-  {
-    number: "02",
-    title: "TWO TONGUES",
-    subtitle: "Nepali + Maithili",
-    image: "/edition-languages-v1.webp",
-    alt: "A cream hardback book with two interlocking speech forms on its cover",
-  },
-  {
-    number: "03",
-    title: "CLEAR ENOUGH",
-    subtitle: "Readable for everyone",
-    image: "/edition-access-v1.webp",
-    alt: "A sage hardback book with abstract listening and caption artwork on its cover",
-  },
-  {
-    number: "04",
-    title: "EVERY FRAME",
-    subtitle: "Video without barriers",
-    image: "/edition-frame-v1.webp",
-    alt: "A black hardback book with a retro film frame and caption lines on its cover",
   },
 ] as const;
 
@@ -136,7 +104,6 @@ function observeArtworkMarkers(
 export default function Home() {
   const artworkRoot = useRef<HTMLElement>(null);
   const aboutArtworkRoot = useRef<HTMLDivElement>(null);
-  const editionsRoot = useRef<HTMLElement>(null);
 
   useEffect(() => {
     const root = artworkRoot.current;
@@ -174,34 +141,6 @@ export default function Home() {
       markerObserver.disconnect();
       scope.revert();
     };
-  }, []);
-
-  useEffect(() => {
-    const root = editionsRoot.current;
-
-    if (!root) {
-      return;
-    }
-
-    const revealEditions = () => root.classList.add("is-visible");
-
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      revealEditions();
-      return;
-    }
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          revealEditions();
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.32 },
-    );
-
-    observer.observe(root);
-    return () => observer.disconnect();
   }, []);
 
   useEffect(() => {
@@ -438,53 +377,29 @@ export default function Home() {
           </div>
         </section>
 
-        <section
-          className="editions-section"
-          id="editions"
-          aria-labelledby="editions-title"
-          ref={editionsRoot}
-        >
-          <header className="editions-heading">
-            <div>
-              <p>BOLI / LANGUAGE COLLECTION</p>
-              <h2 id="editions-title">BOLI EDITIONS</h2>
-            </div>
-            <p>
-              Four pocket-sized stories about keeping every voice in the
-              frame.
-            </p>
-          </header>
-
-          <div className="editions-shelf">
-            {EDITIONS.map((edition, index) => (
-              <article
-                className="edition-card"
-                key={edition.title}
-                style={{ "--edition-index": index } as CSSProperties}
-              >
-                <div className="edition-book-visual">
-                  <span className="edition-shadow" aria-hidden="true" />
-                  <Image
-                    className="edition-book-image"
-                    src={edition.image}
-                    alt={edition.alt}
-                    width={1024}
-                    height={1536}
-                    unoptimized
-                  />
-                </div>
-
-                <div className="edition-label">
-                  <span>{edition.number}</span>
-                  <div>
-                    <h3>{edition.title}</h3>
-                    <p>{edition.subtitle}</p>
-                  </div>
-                </div>
-              </article>
-            ))}
+        <footer className="site-footer" id="contact">
+          <div className="footer-intro">
+            <a className="footer-brand" href="#home" aria-label="Boli home">
+              BOLI<span>.</span>
+            </a>
+            <p>Every word, right when it matters.</p>
           </div>
-        </section>
+
+          <div className="footer-languages" aria-label="Supported languages">
+            <span>NEPALI</span>
+            <b aria-hidden="true">+</b>
+            <span>MAITHILI</span>
+          </div>
+
+          <div className="footer-links">
+            <a href="mailto:hello@boli.live">HELLO@BOLI.LIVE</a>
+            <a href="#home">
+              BACK TO TOP <span aria-hidden="true">↗</span>
+            </a>
+          </div>
+
+          <p className="footer-note">LIVE CAPTIONS / MADE FOR EVERYONE</p>
+        </footer>
       </section>
     </main>
   );
