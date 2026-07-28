@@ -4,7 +4,6 @@ import Image from "next/image";
 import { animate, createScope } from "animejs";
 import { useEffect, useRef } from "react";
 import type { CSSProperties, MouseEvent } from "react";
-import { InteractiveHoverLinks } from "@/components/ui/interactive-hover-links";
 
 const ARTWORK_SIZE = { width: 783, height: 830 } as const;
 
@@ -46,32 +45,24 @@ const NAVIGATION = [
 
 const FEATURES = [
   {
-    number: "01",
     heading: "REAL-TIME CAPTIONS",
     subheading:
       "See every word as it happens with ultra-low delay, so you never miss a thing.",
-    imgSrc: "/feature-real-time-v1.png",
   },
   {
-    number: "02",
     heading: "HIGH ACCURACY",
     subheading:
       "AI-powered precision designed to understand context, not just words.",
-    imgSrc: "/feature-accuracy-v1.png",
   },
   {
-    number: "03",
     heading: "MULTI-LANGUAGE",
     subheading:
       "Built for seamless Nepali and Maithili conversations across every kind of video.",
-    imgSrc: "/feature-multilanguage-v1.png",
   },
   {
-    number: "04",
     heading: "ACCESSIBLE FOR ALL",
     subheading:
       "Clear, readable captions designed so everyone can follow along.",
-    imgSrc: "/feature-accessible-v1.png",
   },
 ] as const;
 
@@ -361,7 +352,16 @@ export default function Home() {
               <p>Live captions made to understand every moment.</p>
             </header>
 
-            <InteractiveHoverLinks links={FEATURES} />
+            <div className="feature-list">
+              {FEATURES.map((feature) => (
+                <article className="feature-row" key={feature.heading}>
+                  <div className="feature-copy">
+                    <h3>{feature.heading}</h3>
+                    <p>{feature.subheading}</p>
+                  </div>
+                </article>
+              ))}
+            </div>
           </div>
 
           <div className="features-visual">
