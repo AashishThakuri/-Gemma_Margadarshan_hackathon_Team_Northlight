@@ -48,18 +48,18 @@ test("server-renders the Verse landing page", async () => {
   assert.doesNotMatch(html, /codex-preview|react-loading-skeleton/i);
 });
 
-test("server-renders the functional Verse caption studio", async () => {
+test("server-renders the functional Try Verse conversation", async () => {
   const response = await render("/try-verse");
   assert.equal(response.status, 200);
 
   const html = await response.text();
-  assert.match(html, /CAPTION WORKSPACE \/ READY/);
-  assert.match(html, /PUT YOUR VIDEO/);
-  assert.match(html, /INTO WORDS\./);
-  assert.match(html, /DROP YOUR VIDEO HERE/);
-  assert.match(html, /PASTE A VIDEO LINK OR NAME THIS PROJECT/);
-  assert.match(html, /RECENT VIDEOS/);
-  assert.match(html, /type="file"/);
+  assert.match(html, /WORDS, IN MOTION/);
+  assert.match(html, /What do you want/);
+  assert.match(html, /to say\?/);
+  assert.match(html, /Share a thought, a scene, or a line from your video\./);
+  assert.match(html, /Type a message\.\.\./);
+  assert.match(html, /SHIFT \+ ENTER FOR A NEW LINE/);
+  assert.doesNotMatch(html, /RECENT VIDEOS|DROP YOUR VIDEO HERE|CAPTION LANGUAGE/);
   assert.match(html, /type="submit"/);
 });
 
