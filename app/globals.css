@@ -170,18 +170,13 @@ a {
 
 .preloader-word {
   position: absolute;
-  top: 50%;
-  left: 50%;
   display: grid;
   width: min(90%, 82rem);
-  height: clamp(9rem, 17vw, 18rem);
   margin: 0;
-  grid-template-rows: minmax(0, 1fr) auto;
   opacity: 0;
   place-items: center;
   text-align: center;
   transform: translateY(125%) rotateX(-72deg);
-  translate: -50% -50%;
   visibility: hidden;
   will-change: transform, opacity;
 }
@@ -193,13 +188,10 @@ a {
 }
 
 .preloader-word > span {
-  display: flex;
-  min-height: 0;
-  align-items: center;
+  display: block;
   font-family: var(--font-display), "Nirmala UI", sans-serif;
   font-size: clamp(4.2rem, 12vw, 14rem);
   font-weight: 900;
-  justify-content: center;
   letter-spacing: -0.075em;
   line-height: 0.78;
   white-space: nowrap;
