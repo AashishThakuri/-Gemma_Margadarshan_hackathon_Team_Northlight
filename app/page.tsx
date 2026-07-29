@@ -11,25 +11,21 @@ import type { CSSProperties, MouseEvent } from "react";
 const PRELOADER_WORDS = [
   {
     label: "VERSE.",
-    language: "ENGLISH",
     color: "#11110c",
     foreground: "#f3d9b9",
   },
   {
     label: "पद्य",
-    language: "NEPALI / VERSE",
     color: "#d86f55",
     foreground: "#11110c",
   },
   {
     label: "छंद",
-    language: "HINDI / VERSE",
     color: "#75b178",
     foreground: "#11110c",
   },
   {
     label: "詩",
-    language: "JAPANESE / VERSE",
     color: "#11110c",
     foreground: "#f3d9b9",
   },
@@ -573,7 +569,6 @@ export default function Home() {
             {PRELOADER_WORDS.map((word) => (
               <p className="preloader-word" key={word.label}>
                 <span>{word.label}</span>
-                <small>{word.language}</small>
               </p>
             ))}
           </div>
