@@ -95,6 +95,14 @@ a {
   padding: var(--frame-gap);
 }
 
+.page.is-preloading {
+  position: fixed;
+  width: 100%;
+  min-height: 100svh;
+  overflow: hidden;
+  inset: 0;
+}
+
 .page.is-preloading .site-shell {
   visibility: hidden;
 }
@@ -162,13 +170,18 @@ a {
 
 .preloader-word {
   position: absolute;
+  top: 50%;
+  left: 50%;
   display: grid;
   width: min(90%, 82rem);
+  height: clamp(9rem, 17vw, 18rem);
   margin: 0;
+  grid-template-rows: minmax(0, 1fr) auto;
   opacity: 0;
   place-items: center;
   text-align: center;
   transform: translateY(125%) rotateX(-72deg);
+  translate: -50% -50%;
   visibility: hidden;
   will-change: transform, opacity;
 }
@@ -180,10 +193,13 @@ a {
 }
 
 .preloader-word > span {
-  display: block;
+  display: flex;
+  min-height: 0;
+  align-items: center;
   font-family: var(--font-display), "Nirmala UI", sans-serif;
   font-size: clamp(4.2rem, 12vw, 14rem);
   font-weight: 900;
+  justify-content: center;
   letter-spacing: -0.075em;
   line-height: 0.78;
   white-space: nowrap;
@@ -403,6 +419,10 @@ h1 span i {
   display: block;
   font-style: normal;
   will-change: transform;
+}
+
+.headline-word-gap {
+  word-spacing: 0.8rem;
 }
 
 .language-bar {

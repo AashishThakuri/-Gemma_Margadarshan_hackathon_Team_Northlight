@@ -647,7 +647,7 @@ export default function Home() {
                   <i>CAPTIONS.</i>
                 </span>
                 <span>
-                  <i>AS IT</i>
+                  <i className="headline-word-gap">AS IT</i>
                 </span>
                 <span>
                   <i>HAPPENS.</i>
@@ -656,7 +656,7 @@ export default function Home() {
             </div>
 
             <a className="language-bar" id="languages" href="#features">
-              PRESS PLAY. FOLLOW EVERY WORD.
+              EVERY MOMENT, MADE CLEAR.
             </a>
           </section>
 
