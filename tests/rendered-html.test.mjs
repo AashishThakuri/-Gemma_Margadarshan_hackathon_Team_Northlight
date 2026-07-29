@@ -53,12 +53,12 @@ test("server-renders the functional Verse caption studio", async () => {
   assert.equal(response.status, 200);
 
   const html = await response.text();
-  assert.match(html, /THE CAPTION CUTTING ROOM/);
-  assert.match(html, /GIVE THE PICTURE/);
-  assert.match(html, /A VOICE YOU CAN SEE\./);
-  assert.match(html, /DROP THE MOVING PICTURE/);
-  assert.match(html, /PASTE A VIDEO LINK OR NAME THIS CUT/);
-  assert.match(html, /RECENT CUTS/);
+  assert.match(html, /CAPTION WORKSPACE \/ READY/);
+  assert.match(html, /PUT YOUR VIDEO/);
+  assert.match(html, /INTO WORDS\./);
+  assert.match(html, /DROP YOUR VIDEO HERE/);
+  assert.match(html, /PASTE A VIDEO LINK OR NAME THIS PROJECT/);
+  assert.match(html, /RECENT VIDEOS/);
   assert.match(html, /type="file"/);
   assert.match(html, /type="submit"/);
 });
