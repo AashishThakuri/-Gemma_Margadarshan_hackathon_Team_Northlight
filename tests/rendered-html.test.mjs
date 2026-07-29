@@ -54,6 +54,9 @@ test("keeps the requested typography and smooth-scroll dependencies local", asyn
   assert.match(css, /--font-mono:\s*"Space Mono"/);
   assert.match(css, /\.desktop-nav a,\s*\n\.nav-cta\s*\{[^}]*var\(--font-mono\)/s);
   assert.match(css, /\.nav-text-mono\s*\{[^}]*var\(--font-mono\)/s);
+  assert.match(css, /\.nav-text-mono\s*\{[^}]*letter-spacing:\s*0\.12em/s);
+  assert.match(css, /\.preloader-word\s*\{[^}]*opacity:\s*0/s);
+  assert.match(css, /\.preloader-word:first-child\s*\{[^}]*opacity:\s*1/s);
   assert.match(css, /\.about-text p\s*\{[^}]*var\(--font-mono\)/s);
   assert.match(layout, /@fontsource\/space-mono\/400\.css/);
   assert.match(layout, /@fontsource\/space-mono\/700\.css/);
