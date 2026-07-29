@@ -306,6 +306,10 @@ a {
   letter-spacing: -0.025em;
 }
 
+.nav-text-mono {
+  font-family: var(--font-mono) !important;
+}
+
 .desktop-nav a::after {
   position: absolute;
   right: 0;
