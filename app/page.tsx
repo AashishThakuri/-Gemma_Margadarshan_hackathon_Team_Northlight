@@ -647,16 +647,16 @@ export default function Home() {
                   <i>CAPTIONS.</i>
                 </span>
                 <span>
-                  <i>TWO</i>
+                  <i>AS IT</i>
                 </span>
                 <span>
-                  <i>LANGUAGES.</i>
+                  <i>HAPPENS.</i>
                 </span>
               </h1>
             </div>
 
             <a className="language-bar" id="languages" href="#features">
-              NEPALI + MAITHILI
+              PRESS PLAY. FOLLOW EVERY WORD.
             </a>
           </section>
 
