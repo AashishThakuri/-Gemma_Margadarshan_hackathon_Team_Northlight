@@ -298,6 +298,7 @@ a {
 .desktop-nav a,
 .nav-cta {
   position: relative;
+  font-family: var(--font-mono);
   font-size: 1.02rem;
   font-weight: 500;
   letter-spacing: -0.025em;
@@ -576,6 +577,7 @@ h1 span i {
 
 .about-text p {
   margin: 0;
+  font-family: var(--font-mono);
   font-size: clamp(1.15rem, 1.55vw, 1.85rem);
   letter-spacing: -0.035em;
   line-height: 1.42;
@@ -1054,6 +1056,7 @@ h1 span i {
   .mobile-menu nav a {
     padding: 1rem 1.2rem;
     border-bottom: 0.1rem solid rgb(10 9 8 / 25%);
+    font-family: var(--font-mono);
     font-size: 0.9rem;
     font-weight: 600;
   }

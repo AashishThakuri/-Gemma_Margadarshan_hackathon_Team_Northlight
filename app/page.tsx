@@ -11,25 +11,25 @@ import type { CSSProperties, MouseEvent } from "react";
 const PRELOADER_WORDS = [
   {
     label: "VERSE.",
-    language: "IDENTITY",
+    language: "ENGLISH",
     color: "#11110c",
     foreground: "#f3d9b9",
   },
   {
-    label: "सुन्नुहोस्",
-    language: "NEPALI / LISTEN",
+    label: "पद्य",
+    language: "NEPALI / VERSE",
     color: "#d86f55",
     foreground: "#11110c",
   },
   {
-    label: "सुनू",
-    language: "MAITHILI / LISTEN",
+    label: "छंद",
+    language: "HINDI / VERSE",
     color: "#75b178",
     foreground: "#11110c",
   },
   {
-    label: "UNDERSTAND.",
-    language: "EVERY MOMENT",
+    label: "詩",
+    language: "JAPANESE / VERSE",
     color: "#11110c",
     foreground: "#f3d9b9",
   },
