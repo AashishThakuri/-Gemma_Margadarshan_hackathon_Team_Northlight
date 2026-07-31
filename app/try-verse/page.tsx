@@ -2,72 +2,70 @@
 
 import {
   useEffect,
-  useMemo,
   useRef,
   useState,
-  type CSSProperties,
   type ChangeEvent,
   type DragEvent,
   type FormEvent,
 } from "react";
 import styles from "./studio.module.css";
 
-const STUDIO_NAVIGATION = [
-  { label: "Caption room", marker: "01", target: "caption-room" },
-  { label: "Signal desk", marker: "02", target: "signal-desk" },
-  { label: "Recent cuts", marker: "03", target: "recent-cuts" },
+const NAVIGATION = [
+  { label: "Home", code: "01", target: "studio-home" },
+  { label: "Recent videos", code: "02", target: "recent-videos" },
+  { label: "Caption guide", code: "03", target: "caption-guide" },
+  { label: "Language desk", code: "04", target: "language-desk" },
 ] as const;
 
-const LANGUAGES = ["BOTH", "NEPALI", "MAITHILI"] as const;
+const LANGUAGES = ["NEPALI", "MAITHILI", "BOTH"] as const;
 type Language = (typeof LANGUAGES)[number];
 
-const CAPTION_REEL = [
+const CAPTIONS = [
   {
     nepali: "हरेक शब्द, ठीक समयमा।",
     maithili: "हरेक शब्द, ठीक समय पर।",
-  },
-  {
-    nepali: "तपाईं हेर्नुहोस्। भर्सले सुन्छ।",
-    maithili: "अहाँ देखू। भर्स सुनैत अछि।",
   },
   {
     nepali: "कथा चलिरहन्छ, अर्थ छुट्दैन।",
     maithili: "कथा चलैत रहैत अछि, अर्थ नहि छुटैत अछि।",
   },
   {
-    nepali: "अब आवाज पढ्न सकिन्छ।",
-    maithili: "आब आवाज पढ़ल जा सकैत अछि।",
+    nepali: "तपाईं हेर्नुहोस्। भर्सले सुन्छ।",
+    maithili: "अहाँ देखू। भर्स सुनैत अछि।",
   },
 ] as const;
 
-const RECENT_CUTS = [
+const RECENT_VIDEOS = [
   {
-    id: "mountain-lesson",
-    title: "THE MOUNTAIN LESSON",
-    detail: "NEPALI · 08:42",
-    palette: "coral",
+    id: "street-stories",
+    title: "STREET STORIES",
+    detail: "TODAY · NEPALI",
+    color: "coral",
     caption: "कथा चलिरहन्छ, अर्थ छुट्दैन।",
+    index: "A01",
   },
   {
-    id: "mithila-stories",
-    title: "MITHILA STORIES",
-    detail: "MAITHILI · 12:16",
-    palette: "sage",
-    caption: "आब आवाज पढ़ल जा सकैत अछि।",
+    id: "mithila-notes",
+    title: "MITHILA NOTES",
+    detail: "TODAY · MAITHILI",
+    color: "sage",
+    caption: "अहाँ देखू। भर्स सुनैत अछि।",
+    index: "B02",
   },
   {
-    id: "city-interview",
-    title: "CITY INTERVIEW",
-    detail: "BILINGUAL · 04:09",
-    palette: "cream",
-    caption: "Every voice stays in the frame.",
+    id: "studio-interview",
+    title: "STUDIO INTERVIEW",
+    detail: "YESTERDAY · BILINGUAL",
+    color: "yellow",
+    caption: "EVERY VOICE STAYS IN FRAME.",
+    index: "C03",
   },
 ] as const;
 
-function isVideoAddress(value: string) {
+function isWebAddress(value: string) {
   try {
     const url = new URL(value);
-    return url.protocol === "http:" || url.protocol === "https:";
+    return url.protocol === "https:" || url.protocol === "http:";
   } catch {
     return false;
   }
@@ -75,31 +73,31 @@ function isVideoAddress(value: string) {
 
 export default function TryVerse() {
   const fileInput = useRef<HTMLInputElement>(null);
-  const burstTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const sendTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
-  const [videoName, setVideoName] = useState("");
+  const [projectName, setProjectName] = useState("");
   const [demoCaption, setDemoCaption] = useState<string | null>(null);
   const [language, setLanguage] = useState<Language>("BOTH");
-  const [captioning, setCaptioning] = useState(false);
   const [captionIndex, setCaptionIndex] = useState(0);
   const [dragging, setDragging] = useState(false);
   const [command, setCommand] = useState("");
-  const [commandBurst, setCommandBurst] = useState(false);
+  const [sending, setSending] = useState(false);
 
-  const captions = useMemo(() => CAPTION_REEL[captionIndex], [captionIndex]);
+  const hasProject = Boolean(videoUrl || demoCaption);
+  const activeCaption = CAPTIONS[captionIndex];
 
   useEffect(() => {
     return () => {
       if (videoUrl?.startsWith("blob:")) {
         URL.revokeObjectURL(videoUrl);
       }
-      if (burstTimer.current) {
-        clearTimeout(burstTimer.current);
+      if (sendTimer.current) {
+        clearTimeout(sendTimer.current);
       }
     };
   }, [videoUrl]);
 
-  function loadFile(file?: File) {
+  function loadVideo(file?: File) {
     if (!file || !file.type.startsWith("video/")) {
       return;
     }
@@ -109,241 +107,247 @@ export default function TryVerse() {
     }
 
     setVideoUrl(URL.createObjectURL(file));
-    setVideoName(file.name);
+    setProjectName(file.name.replace(/\.[^/.]+$/, "").toUpperCase());
     setDemoCaption(null);
-    setCaptioning(true);
     setCaptionIndex(0);
   }
 
   function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
-    loadFile(event.target.files?.[0]);
+    loadVideo(event.target.files?.[0]);
   }
 
   function handleDrop(event: DragEvent<HTMLDivElement>) {
     event.preventDefault();
     setDragging(false);
-    loadFile(event.dataTransfer.files?.[0]);
+    loadVideo(event.dataTransfer.files?.[0]);
   }
 
-  function triggerCommandBurst() {
-    setCommandBurst(false);
-    requestAnimationFrame(() => setCommandBurst(true));
-    if (burstTimer.current) {
-      clearTimeout(burstTimer.current);
+  function flashCommand() {
+    setSending(false);
+    requestAnimationFrame(() => setSending(true));
+    if (sendTimer.current) {
+      clearTimeout(sendTimer.current);
     }
-    burstTimer.current = setTimeout(() => setCommandBurst(false), 1100);
+    sendTimer.current = setTimeout(() => setSending(false), 900);
   }
 
-  function handleCommand(event: FormEvent<HTMLFormElement>) {
+  function submitCommand(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const value = command.trim();
+
     if (!value) {
       fileInput.current?.click();
       return;
     }
 
-    triggerCommandBurst();
-    if (isVideoAddress(value)) {
+    flashCommand();
+    if (isWebAddress(value)) {
       if (videoUrl?.startsWith("blob:")) {
         URL.revokeObjectURL(videoUrl);
       }
       setVideoUrl(value);
-      setVideoName("LINKED VIDEO");
+      setProjectName("LINKED VIDEO");
       setDemoCaption(null);
-      setCaptioning(true);
       setCaptionIndex(0);
     } else {
-      setVideoName(value.toUpperCase());
+      setProjectName(value.toUpperCase());
     }
     setCommand("");
   }
 
-  function loadRecentCut(project: (typeof RECENT_CUTS)[number]) {
+  function openRecent(project: (typeof RECENT_VIDEOS)[number]) {
     if (videoUrl?.startsWith("blob:")) {
       URL.revokeObjectURL(videoUrl);
     }
     setVideoUrl(null);
-    setVideoName(project.title);
+    setProjectName(project.title);
     setDemoCaption(project.caption);
-    setCaptioning(true);
-    setCaptionIndex(RECENT_CUTS.findIndex((item) => item.id === project.id));
-    document.getElementById("caption-room")?.scrollIntoView({
+    setLanguage(project.detail.includes("MAITHILI") ? "MAITHILI" : "BOTH");
+    setCaptionIndex(RECENT_VIDEOS.findIndex((item) => item.id === project.id));
+    document.getElementById("studio-home")?.scrollIntoView({
       behavior: "smooth",
       block: "start",
     });
   }
 
-  function displayCaptionLines() {
+  function captionLines() {
     if (demoCaption) {
-      return <span>{demoCaption}</span>;
+      return <strong>{demoCaption}</strong>;
     }
-
     if (language === "NEPALI") {
-      return <span>{captions.nepali}</span>;
+      return <strong>{activeCaption.nepali}</strong>;
     }
     if (language === "MAITHILI") {
-      return <span>{captions.maithili}</span>;
+      return <strong>{activeCaption.maithili}</strong>;
     }
     return (
       <>
-        <span>{captions.nepali}</span>
-        <span>{captions.maithili}</span>
+        <strong>{activeCaption.nepali}</strong>
+        <strong>{activeCaption.maithili}</strong>
       </>
     );
   }
 
-  const hasProject = Boolean(videoUrl || demoCaption);
-
   return (
-    <main className={styles.studio}>
+    <main className={styles.app}>
       <aside className={styles.sidebar}>
-        <a className={styles.brand} href="/" aria-label="Return to Verse home">
+        <a className={styles.logo} href="/" aria-label="Return to Verse home">
           VERSE<span>.</span>
         </a>
 
-        <p className={styles.sidebarLabel}>LIVE CAPTION STUDIO / 01</p>
-
-        <nav className={styles.sidebarNavigation} aria-label="Studio navigation">
-          {STUDIO_NAVIGATION.map((item) => (
+        <nav aria-label="Caption studio navigation">
+          {NAVIGATION.map((item) => (
             <a href={`#${item.target}`} key={item.target}>
-              <span>{item.marker}</span>
+              <span>{item.code}</span>
               {item.label}
             </a>
           ))}
         </nav>
 
-        <div className={styles.signalCard}>
-          <div className={styles.signalReel} aria-hidden="true">
-            <i />
-            <i />
+        <section className={styles.usageCard}>
+          <header>
+            <span>LOCAL MODE</span>
+            <strong>PRIVATE</strong>
+          </header>
+          <div>
+            <p>Video processing</p>
+            <span>ON DEVICE</span>
           </div>
-          <p>SIGNAL</p>
-          <strong>{captioning ? "RECEIVING" : "STANDBY"}</strong>
-          <div aria-hidden="true">
-            {Array.from({ length: 12 }, (_, index) => (
-              <i
-                key={index}
-                style={
-                  {
-                    "--delay": `${index * -70}ms`,
-                    "--level": `${24 + (index % 5) * 16}%`,
-                  } as CSSProperties
-                }
-              />
+          <div>
+            <p>Caption languages</p>
+            <span>02 READY</span>
+          </div>
+          <div className={styles.usageBars} aria-hidden="true">
+            {Array.from({ length: 14 }, (_, index) => (
+              <i key={index} />
             ))}
           </div>
-        </div>
+          <small>YOUR VIDEO NEVER LEAVES THIS SCREEN.</small>
+        </section>
 
-        <a className={styles.backLink} href="/">
-          <span>↙</span> BACK TO THE FILM
+        <a className={styles.homeLink} href="/">
+          ← BACK TO WEBSITE
         </a>
       </aside>
 
-      <section className={styles.workspace}>
+      <section className={styles.content}>
         <header className={styles.topbar}>
           <div>
-            <span>VERSE OS</span>
-            <i aria-hidden="true" />
-            <strong>{captioning ? "CAPTION SIGNAL LOCKED" : "READY FOR PICTURE"}</strong>
+            <p>VERSE CAPTION STUDIO</p>
+            <span>LOCAL SESSION / 001</span>
           </div>
-          <time>00:{String(captionIndex * 4).padStart(2, "0")}:12</time>
+          <a href="/">EXIT STUDIO ↗</a>
         </header>
 
-        <section className={styles.captionRoom} id="caption-room">
-          <div className={styles.intro}>
-            <p>THE CAPTION CUTTING ROOM</p>
-            <h1>
-              GIVE THE PICTURE
-              <span>A VOICE YOU CAN SEE.</span>
-            </h1>
-          </div>
-
-          <div className={styles.languageDeck} aria-label="Caption language">
-            <span>LISTEN IN</span>
+        <div className={styles.dashboard} id="studio-home">
+          <section className={styles.heading}>
             <div>
-              {LANGUAGES.map((item) => (
-                <button
-                  className={language === item ? styles.activeLanguage : ""}
-                  key={item}
-                  onClick={() => setLanguage(item)}
-                  type="button"
-                >
-                  {item}
-                </button>
-              ))}
+              <p>CAPTION WORKSPACE / READY</p>
+              <h1>
+                PUT YOUR VIDEO
+                <span>INTO WORDS.</span>
+              </h1>
             </div>
-          </div>
+            <div className={styles.status}>
+              <span>CC</span>
+              <p>
+                SIGNAL
+                <strong>{hasProject ? "CONNECTED" : "WAITING"}</strong>
+              </p>
+            </div>
+          </section>
+
+          <form
+            className={`${styles.command} ${sending ? styles.isSending : ""}`}
+            onSubmit={submitCommand}
+          >
+            <div className={styles.commandSweep} aria-hidden="true" />
+            <label htmlFor="video-link">
+              <span>QUICK LOAD</span>
+              <input
+                autoComplete="off"
+                id="video-link"
+                onChange={(event) => setCommand(event.target.value)}
+                placeholder="PASTE A VIDEO LINK OR NAME THIS PROJECT..."
+                value={command}
+              />
+            </label>
+            <button aria-label="Load video" type="submit">
+              <span>↗</span>
+            </button>
+          </form>
 
           <section
-            className={`${styles.stage} ${dragging ? styles.isDragging : ""}`}
+            className={`${styles.uploadPanel} ${
+              dragging ? styles.isDragging : ""
+            }`}
             onDragEnter={() => setDragging(true)}
             onDragLeave={() => setDragging(false)}
             onDragOver={(event) => event.preventDefault()}
             onDrop={handleDrop}
           >
-            <div className={styles.stageHeader}>
-              <span>FRAME / 24 FPS</span>
+            <header>
               <p>
-                <i aria-hidden="true" />
-                {hasProject ? videoName : "NO FILM LOADED"}
+                <span>VIDEO INPUT</span>
+                <strong>{hasProject ? projectName : "NO FILE SELECTED"}</strong>
               </p>
-              <span>CC / LIVE</span>
-            </div>
+              <p>
+                <span>OUTPUT</span>
+                <strong>{language}</strong>
+              </p>
+            </header>
 
             {hasProject ? (
-              <div className={styles.player}>
+              <div className={styles.preview}>
                 {videoUrl ? (
                   <video
                     controls
-                    onPause={() => setCaptioning(false)}
-                    onPlay={() => setCaptioning(true)}
                     onTimeUpdate={(event) => {
-                      const nextIndex =
+                      setCaptionIndex(
                         Math.floor(event.currentTarget.currentTime / 4) %
-                        CAPTION_REEL.length;
-                      setCaptionIndex(nextIndex);
+                          CAPTIONS.length,
+                      );
                     }}
                     src={videoUrl}
                   >
                     Your browser does not support video playback.
                   </video>
                 ) : (
-                  <div className={styles.demoFilm} aria-label="Caption demo frame">
-                    <span>VOICE</span>
-                    <span>BECOMES</span>
-                    <span>VISIBLE</span>
-                    <div aria-hidden="true" />
+                  <div className={styles.demoFrame}>
+                    <span>THE IMAGE</span>
+                    <span>KEEPS MOVING</span>
+                    <span>THE MEANING STAYS</span>
+                    <i aria-hidden="true" />
                   </div>
                 )}
 
-                {captioning && (
-                  <div className={styles.captionOverlay} aria-live="polite">
-                    <small>VERSE / LIVE</small>
-                    {displayCaptionLines()}
-                  </div>
-                )}
+                <div className={styles.captionBubble} aria-live="polite">
+                  <small>VERSE / LIVE CAPTION</small>
+                  {captionLines()}
+                </div>
 
                 <button
-                  className={styles.replaceButton}
+                  className={styles.replace}
                   onClick={() => fileInput.current?.click()}
                   type="button"
                 >
-                  REPLACE FILM ↗
+                  REPLACE VIDEO
                 </button>
               </div>
             ) : (
               <button
-                className={styles.dropZone}
+                className={styles.dropArea}
                 onClick={() => fileInput.current?.click()}
                 type="button"
               >
-                <span className={styles.dropGlyph} aria-hidden="true">
+                <span className={styles.uploadMark} aria-hidden="true">
+                  <i />
                   <i />
                   <i />
                   <b>CC</b>
                 </span>
-                <strong>DROP THE MOVING PICTURE</strong>
-                <p>OR TAP TO OPEN A VIDEO</p>
+                <strong>DROP YOUR VIDEO HERE</strong>
+                <p>OR CLICK TO CHOOSE A FILE</p>
                 <small>MP4 · MOV · WEBM / LOCAL PREVIEW</small>
               </button>
             )}
@@ -356,113 +360,94 @@ export default function TryVerse() {
               type="file"
             />
           </section>
-        </section>
 
-        <section className={styles.signalDesk} id="signal-desk">
-          <div className={styles.captionControls}>
+          <section className={styles.controlRow} id="language-desk">
             <div>
-              <p>CAPTION MOTOR</p>
-              <strong>{captioning ? "WORDS ARE ARRIVING" : "MOTOR PAUSED"}</strong>
+              <p>CAPTION LANGUAGE</p>
+              <div className={styles.languageButtons}>
+                {LANGUAGES.map((item) => (
+                  <button
+                    className={language === item ? styles.selected : ""}
+                    key={item}
+                    onClick={() => setLanguage(item)}
+                    type="button"
+                  >
+                    {item}
+                  </button>
+                ))}
+              </div>
             </div>
-            <button
-              aria-pressed={captioning}
-              className={captioning ? styles.motorOn : ""}
-              disabled={!hasProject}
-              onClick={() => setCaptioning((current) => !current)}
-              type="button"
-            >
-              <span />
-              {captioning ? "ON" : "OFF"}
-            </button>
-          </div>
 
-          <div className={styles.transcriptRail}>
-            <p>CAPTION REEL</p>
-            <div>
-              {CAPTION_REEL.map((caption, index) => (
+            <div className={styles.captionGuide} id="caption-guide">
+              <p>CAPTION GUIDE</p>
+              <ol>
+                {CAPTIONS.map((caption, index) => (
+                  <li key={caption.nepali}>
+                    <button
+                      className={captionIndex === index ? styles.activeCue : ""}
+                      onClick={() => setCaptionIndex(index)}
+                      type="button"
+                    >
+                      <span>{String(index + 1).padStart(2, "0")}</span>
+                      <strong>
+                        {language === "MAITHILI"
+                          ? caption.maithili
+                          : caption.nepali}
+                      </strong>
+                      <time>00:{String(index * 4).padStart(2, "0")}</time>
+                    </button>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          </section>
+
+          <section className={styles.recent} id="recent-videos">
+            <header>
+              <div>
+                <p>ARCHIVE / LOCAL</p>
+                <h2>RECENT VIDEOS</h2>
+              </div>
+              <span>SELECT A CUT TO PREVIEW</span>
+            </header>
+
+            <div className={styles.videoGrid}>
+              {RECENT_VIDEOS.map((video) => (
                 <button
-                  className={captionIndex === index ? styles.activeCue : ""}
-                  key={caption.nepali}
-                  onClick={() => setCaptionIndex(index)}
+                  className={`${styles.videoCard} ${
+                    styles[`card${video.color}`]
+                  }`}
+                  key={video.id}
+                  onClick={() => openRecent(video)}
                   type="button"
                 >
-                  <span>{String(index + 1).padStart(2, "0")}</span>
-                  <p>
-                    {language === "MAITHILI" ? caption.maithili : caption.nepali}
-                  </p>
-                  <time>00:{String(index * 4).padStart(2, "0")}</time>
+                  <div className={styles.thumbnail}>
+                    <span>{video.index}</span>
+                    <div className={styles.frameLines} aria-hidden="true">
+                      <i />
+                      <i />
+                      <i />
+                    </div>
+                    <p>{video.caption}</p>
+                    <small>CC</small>
+                  </div>
+                  <footer>
+                    <div>
+                      <strong>{video.title}</strong>
+                      <span>{video.detail}</span>
+                    </div>
+                    <b>↗</b>
+                  </footer>
                 </button>
               ))}
             </div>
-          </div>
-        </section>
+          </section>
+        </div>
 
-        <form
-          className={`${styles.commandBar} ${
-            commandBurst ? styles.commandBurst : ""
-          }`}
-          onSubmit={handleCommand}
-        >
-          <div className={styles.commandGlow} aria-hidden="true" />
-          <label htmlFor="video-command">
-            <span>QUICK LOAD</span>
-            <input
-              autoComplete="off"
-              id="video-command"
-              onChange={(event) => setCommand(event.target.value)}
-              placeholder="PASTE A VIDEO LINK OR NAME THIS CUT..."
-              value={command}
-            />
-          </label>
-          <button aria-label="Load video link" type="submit">
-            <span>↗</span>
-          </button>
-        </form>
-
-        <section className={styles.recentSection} id="recent-cuts">
-          <header>
-            <div>
-              <p>ARCHIVE / LOCAL</p>
-              <h2>RECENT CUTS</h2>
-            </div>
-            <span>03 FILMS / NO CLOUD NEEDED</span>
-          </header>
-
-          <div className={styles.recentGrid}>
-            {RECENT_CUTS.map((project, index) => (
-              <button
-                className={`${styles.recentCard} ${
-                  styles[`palette${project.palette}`]
-                }`}
-                key={project.id}
-                onClick={() => loadRecentCut(project)}
-                type="button"
-              >
-                <div className={styles.cardArtwork}>
-                  <span>{String(index + 1).padStart(2, "0")}</span>
-                  <div aria-hidden="true">
-                    <i />
-                    <i />
-                    <i />
-                  </div>
-                  <p>{project.caption}</p>
-                </div>
-                <footer>
-                  <div>
-                    <strong>{project.title}</strong>
-                    <small>{project.detail}</small>
-                  </div>
-                  <span>↗</span>
-                </footer>
-              </button>
-            ))}
-          </div>
-        </section>
-
-        <footer className={styles.studioFooter}>
-          <p>VERSE CAPTION STUDIO</p>
-          <span>THE VIDEO MOVES. UNDERSTANDING STAYS.</span>
-          <time>© 2026</time>
+        <footer className={styles.footer}>
+          <span>VERSE / CAPTION STUDIO</span>
+          <p>THE VIDEO MOVES. UNDERSTANDING STAYS.</p>
+          <span>© 2026</span>
         </footer>
       </section>
     </main>
