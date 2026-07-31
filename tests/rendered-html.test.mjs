@@ -31,10 +31,11 @@ test("server-renders the Verse landing page", async () => {
   const html = await response.text();
   assert.match(html, /<title>Verse — Live Nepali &amp; Maithili Captions<\/title>/);
   assert.match(html, /aria-label="Loading Verse"/);
-  assert.match(html, />VERSE\.<\/span><small>ENGLISH<\/small>/);
-  assert.match(html, />पद्य<\/span><small>NEPALI \/ VERSE<\/small>/);
-  assert.match(html, />छंद<\/span><small>HINDI \/ VERSE<\/small>/);
-  assert.match(html, />詩<\/span><small>JAPANESE \/ VERSE<\/small>/);
+  assert.match(html, />VERSE\.<\/span><\/p>/);
+  assert.match(html, />पद्य<\/span><\/p>/);
+  assert.match(html, />छंद<\/span><\/p>/);
+  assert.match(html, />詩<\/span><\/p>/);
+  assert.doesNotMatch(html, /ENGLISH|NEPALI \/ VERSE|HINDI \/ VERSE|JAPANESE \/ VERSE/);
   assert.match(html, /<nav class="desktop-nav" aria-label="Primary navigation">/);
   assert.match(html, /class="headline-word-gap">AS IT<\/i>/);
   assert.match(html, />HAPPENS\.<\/i>/);
@@ -60,6 +61,7 @@ test("keeps the requested typography and smooth-scroll dependencies local", asyn
   assert.match(css, /\.nav-text-mono\s*\{[^}]*var\(--font-mono\)/s);
   assert.match(css, /\.nav-text-mono\s*\{[^}]*letter-spacing:\s*0\.12em/s);
   assert.match(css, /\.preloader-word\s*\{[^}]*opacity:\s*0/s);
+  assert.match(css, /\.preloader-word\s*\{[^}]*translate:\s*-50%\s+-50%/s);
   assert.match(css, /\.preloader-word:first-child\s*\{[^}]*opacity:\s*1/s);
   assert.match(css, /\.page\.is-preloading\s*\{[^}]*overflow:\s*hidden/s);
   assert.match(css, /\.about-text p\s*\{[^}]*var\(--font-mono\)/s);

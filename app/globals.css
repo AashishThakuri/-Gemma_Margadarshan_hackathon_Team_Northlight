@@ -170,6 +170,8 @@ a {
 
 .preloader-word {
   position: absolute;
+  top: 50%;
+  left: 50%;
   display: grid;
   width: min(90%, 82rem);
   margin: 0;
@@ -177,6 +179,7 @@ a {
   place-items: center;
   text-align: center;
   transform: translateY(125%) rotateX(-72deg);
+  translate: -50% -50%;
   visibility: hidden;
   will-change: transform, opacity;
 }
@@ -195,15 +198,6 @@ a {
   letter-spacing: -0.075em;
   line-height: 0.78;
   white-space: nowrap;
-}
-
-.preloader-word small {
-  display: block;
-  margin-top: 1.3rem;
-  font-family: var(--font-mono);
-  font-size: clamp(0.62rem, 0.95vw, 0.92rem);
-  font-weight: 700;
-  letter-spacing: 0.16em;
 }
 
 .preloader-orbit {
@@ -1196,11 +1190,6 @@ h1 span i {
     font-size: clamp(3rem, 16vw, 5.2rem);
     letter-spacing: -0.055em;
     white-space: normal;
-  }
-
-  .preloader-word small {
-    margin-top: 0.9rem;
-    font-size: 0.58rem;
   }
 
   .preloader-orbit {
