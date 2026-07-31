@@ -195,6 +195,14 @@ The caption request accepts a media file, `source_language`, and `target_languag
 
 This repository contains the Verse web experience and hackathon caption demo. The full training corpus, model checkpoints, and private training workspace are not committed here. The V2 release should be described as a **LoRA/PEFT adapter** unless it is later merged with and distributed alongside compatible Gemma base weights.
 
+## Live inference availability
+
+The VERSE V2 adapter was fine-tuned and evaluated in the RunPod training environment. At the time of this hackathon submission, our RunPod credit balance has been exhausted, so we cannot keep the GPU-backed Gemma inference endpoint publicly available. We sincerely apologize for this temporary limitation.
+
+To keep the product experience reviewable, the **Try Verse** page includes synchronized English, Nepali, and Maithili caption tracks that demonstrate how output from our fine-tuned Gemma workflow is displayed during live caption playback. These prepared tracks demonstrate the caption timing, language switching, and user experience; the public demo is not currently running new model inference in the browser.
+
+As soon as GPU access is restored, the same `/caption` API contract documented in `backend/README.md` can reconnect the VERSE V2 adapter and provide live model-generated captions again.
+
 ## Run locally
 
 ### Requirements
