@@ -40,7 +40,6 @@ const NAVIGATION = [
   { label: "ABOUT", href: "#about" },
   { label: "FEATURES", href: "#features" },
   { label: "LANGUAGES", href: "#languages" },
-  { label: "CONTACT", href: "mailto:hello@boli.live" },
 ];
 
 const FEATURES = [
@@ -378,27 +377,43 @@ export default function Home() {
         </section>
 
         <footer className="site-footer" id="contact">
-          <div className="footer-intro">
-            <a className="footer-brand" href="#home" aria-label="Boli home">
-              BOLI<span>.</span>
+          <div className="footer-ticker" aria-hidden="true">
+            <div className="footer-ticker-track">
+              <span>NO WORD LEFT BEHIND</span>
+              <b>✦</b>
+              <span>NO MOMENT LOST</span>
+              <b>✦</b>
+              <span>NO WORD LEFT BEHIND</span>
+              <b>✦</b>
+              <span>NO MOMENT LOST</span>
+              <b>✦</b>
+            </div>
+          </div>
+
+          <div className="footer-stage">
+            <div className="footer-ending">
+              <p className="footer-timecode">FINAL FRAME / 00:00:00</p>
+              <h2>
+                THE END<span>?</span>
+              </h2>
+              <p className="footer-ending-copy">
+                Only for the video.
+                <strong> Understanding keeps playing.</strong>
+              </p>
+            </div>
+
+            <a className="footer-rewind" href="#home" aria-label="Back to top">
+              <span className="footer-rewind-disc" aria-hidden="true">
+                <i>↺</i>
+              </span>
+              <strong>REWIND TO THE TOP</strong>
             </a>
-            <p>Every word, right when it matters.</p>
           </div>
 
-          <div className="footer-languages" aria-label="Supported languages">
-            <span>NEPALI</span>
-            <b aria-hidden="true">+</b>
-            <span>MAITHILI</span>
+          <div className="footer-bottom">
+            <p>© 2026 BOLI. ALL RIGHTS RESERVED.</p>
+            <p>CAPTIONS THAT ARRIVE WITH THE MOMENT.</p>
           </div>
-
-          <div className="footer-links">
-            <a href="mailto:hello@boli.live">HELLO@BOLI.LIVE</a>
-            <a href="#home">
-              BACK TO TOP <span aria-hidden="true">↗</span>
-            </a>
-          </div>
-
-          <p className="footer-note">LIVE CAPTIONS / MADE FOR EVERYONE</p>
         </footer>
       </section>
     </main>
