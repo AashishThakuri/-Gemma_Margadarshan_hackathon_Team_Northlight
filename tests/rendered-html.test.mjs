@@ -29,7 +29,7 @@ test("server-renders the Verse landing page", async () => {
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
 
   const html = await response.text();
-  assert.match(html, /<title>Verse — Live Nepali &amp; Maithili Captions<\/title>/);
+  assert.match(html, /<title>Verse Hackathon — Live Nepali &amp; Maithili Captions<\/title>/);
   assert.match(html, /aria-label="Loading Verse"/);
   assert.match(html, />VERSE\.<\/span><\/p>/);
   assert.match(html, />पद्य<\/span><\/p>/);

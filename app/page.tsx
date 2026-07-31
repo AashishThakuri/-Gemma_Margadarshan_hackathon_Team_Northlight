@@ -31,6 +31,8 @@ const PRELOADER_WORDS = [
   },
 ] as const;
 
+const PRELOADER_SESSION_KEY = "verse-preloader-seen";
+
 const ARTWORK_SIZE = { width: 783, height: 830 } as const;
 
 const CASSETTE_REELS = [
@@ -137,6 +139,21 @@ export default function Home() {
   const [showFloatingNavigation, setShowFloatingNavigation] = useState(false);
 
   useEffect(() => {
+    const hasSeenPreloader = (() => {
+      try {
+        return window.sessionStorage.getItem(PRELOADER_SESSION_KEY) === "true";
+      } catch {
+        return false;
+      }
+    })();
+
+    if (hasSeenPreloader) {
+      document.body.classList.remove("is-loading");
+      document.documentElement.dataset.preloaderSeen = "true";
+      setIsPreloading(false);
+      return;
+    }
+
     const root = preloaderRoot.current;
     const counter = preloaderCounter.current;
 
@@ -166,6 +183,13 @@ export default function Home() {
       const timeline = gsap.timeline({
         defaults: { ease: "power4.out" },
         onComplete: () => {
+          try {
+            window.sessionStorage.setItem(PRELOADER_SESSION_KEY, "true");
+            document.documentElement.dataset.preloaderSeen = "true";
+          } catch {
+            document.documentElement.dataset.preloaderSeen = "true";
+          }
+
           document.body.classList.remove("is-loading");
           setIsPreloading(false);
         },

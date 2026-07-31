@@ -107,6 +107,21 @@ a {
   visibility: hidden;
 }
 
+html[data-preloader-seen="true"] .page.is-preloading {
+  position: static;
+  width: auto;
+  overflow: visible;
+  inset: auto;
+}
+
+html[data-preloader-seen="true"] .page.is-preloading .site-shell {
+  visibility: visible;
+}
+
+html[data-preloader-seen="true"] .page.is-preloading .preloader {
+  display: none;
+}
+
 .page.is-preloading .feature-disc-motion {
   animation-play-state: paused;
 }
