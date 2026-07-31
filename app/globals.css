@@ -165,9 +165,18 @@ a {
   display: grid;
   width: min(90%, 82rem);
   margin: 0;
+  opacity: 0;
   place-items: center;
   text-align: center;
+  transform: translateY(125%) rotateX(-72deg);
+  visibility: hidden;
   will-change: transform, opacity;
+}
+
+.preloader-word:first-child {
+  opacity: 1;
+  transform: translateY(0) rotateX(0);
+  visibility: visible;
 }
 
 .preloader-word > span {
@@ -308,6 +317,7 @@ a {
 
 .nav-text-mono {
   font-family: var(--font-mono) !important;
+  letter-spacing: 0.12em !important;
 }
 
 .desktop-nav a::after {
