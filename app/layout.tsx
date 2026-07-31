@@ -8,7 +8,9 @@ import "@fontsource/space-mono/400.css";
 import "@fontsource/space-mono/700.css";
 import "./globals.css";
 
-const SITE_TITLE = "Verse — Live Nepali & Maithili Captions";
+const PRELOADER_FLAG_SCRIPT = `try{if(window.sessionStorage.getItem("verse-preloader-seen")==="true"){document.documentElement.dataset.preloaderSeen="true";}}catch(error){}`;
+
+const SITE_TITLE = "Verse Hackathon — Live Nepali & Maithili Captions";
 const SITE_DESCRIPTION =
   "Live, accessible captions for Nepali and Maithili video—clear, fast, and built for every screen.";
 
@@ -50,6 +52,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <script
+          dangerouslySetInnerHTML={{ __html: PRELOADER_FLAG_SCRIPT }}
+        />
+      </head>
       <body>{children}</body>
     </html>
   );
