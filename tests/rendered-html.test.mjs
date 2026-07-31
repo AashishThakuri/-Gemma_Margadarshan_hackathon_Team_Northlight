@@ -36,6 +36,10 @@ test("server-renders the Verse landing page", async () => {
   assert.match(html, />छंद<\/span><small>HINDI \/ VERSE<\/small>/);
   assert.match(html, />詩<\/span><small>JAPANESE \/ VERSE<\/small>/);
   assert.match(html, /<nav class="desktop-nav" aria-label="Primary navigation">/);
+  assert.match(html, />AS IT<\/i>/);
+  assert.match(html, />HAPPENS\.<\/i>/);
+  assert.match(html, />PRESS PLAY\. FOLLOW EVERY WORD\.<\/a>/);
+  assert.doesNotMatch(html, />TWO<\/i>|>LANGUAGES\.<\/i>|NEPALI \+ MAITHILI/);
   assert.match(
     html,
     /class="nav-cta nav-text-mono" href="#features">TRY VERSE<\/a>/,
