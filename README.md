@@ -15,6 +15,9 @@ Multilingual speech recognition, translation, and live captions for English, Nep
 
 ![Verse landing page](frontend/public/verse-landing.png)
 
+> [!IMPORTANT]
+> **Live Gemma inference is temporarily unavailable.** Our RunPod GPU credit balance was exhausted after fine-tuning and evaluation, so we cannot keep the VERSE V2 endpoint publicly online right now. We sincerely apologize. The **Try Verse** demo uses prepared, synchronized English, Nepali, and Maithili caption tracks to show exactly how output from our fine-tuned Gemma model appears in the live-caption interface; it is not presented as fresh browser inference. We will restore the model-backed `/caption` endpoint as soon as GPU access is available again.
+
 ## Overview
 
 Verse is a multilingual captioning system built by **Team Northlight** for the **Gemma Margadarshan Hackathon**. It combines a fine-tuned Gemma speech model with a responsive web experience for turning uploaded audio, uploaded video, or shared video links into readable captions.
