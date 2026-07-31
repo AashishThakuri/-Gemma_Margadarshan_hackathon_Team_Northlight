@@ -285,19 +285,18 @@ export default function Home() {
     gsap.registerPlugin(ScrollTrigger);
 
     const lenis = new Lenis({
-      lerp: 0.16,
+      autoRaf: true,
+      lerp: 0.12,
       smoothWheel: true,
       syncTouch: false,
       touchMultiplier: 1,
       wheelMultiplier: 1,
+      overscroll: false,
     });
 
     const updateScrollTrigger = () => ScrollTrigger.update();
-    const tick = (time: number) => lenis.raf(time * 1000);
 
     lenis.on("scroll", updateScrollTrigger);
-    gsap.ticker.add(tick);
-    gsap.ticker.lagSmoothing(500, 33);
 
     if (isPreloading) {
       lenis.stop();
@@ -308,7 +307,6 @@ export default function Home() {
 
     return () => {
       lenis.off("scroll", updateScrollTrigger);
-      gsap.ticker.remove(tick);
       lenis.destroy();
     };
   }, [isPreloading]);
