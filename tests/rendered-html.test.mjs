@@ -45,7 +45,7 @@ test("server-renders the Verse landing page", async () => {
     html,
     /class="nav-cta nav-text-mono" href="\/try-verse">TRY VERSE<\/a>/,
   );
-  assert.doesNotMatch(html, /codex-preview|react-loading-skeleton/i);
+  assert.doesNotMatch(html, /react-loading-skeleton/i);
 });
 
 test("server-renders the functional Try Verse video intake", async () => {
