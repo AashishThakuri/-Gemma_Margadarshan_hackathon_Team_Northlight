@@ -201,7 +201,7 @@ The VERSE V2 adapter was fine-tuned and evaluated in the RunPod training environ
 
 To keep the product experience reviewable, the **Try Verse** page includes synchronized English, Nepali, and Maithili caption tracks that demonstrate how output from our fine-tuned Gemma workflow is displayed during live caption playback. These prepared tracks demonstrate the caption timing, language switching, and user experience; the public demo is not currently running new model inference in the browser.
 
-As soon as GPU access is restored, the same `/caption` API contract documented in `backend/README.md` can reconnect the VERSE V2 adapter and provide live model-generated captions again.
+As soon as GPU access is restored, the `/caption` API can reconnect the VERSE V2 adapter and provide live model-generated captions again. The cleaned V2 fine-tuning implementation is included at `backend/train_v2.py`.
 
 ## Run locally
 
@@ -239,7 +239,7 @@ frontend/
 |-- tests/                    # Rendered-page smoke tests
 `-- worker/                   # Cloudflare-compatible worker entry
 backend/
-`-- README.md                 # Caption API contract and model-service scope
+`-- train_v2.py               # Clean VERSE V2 LoRA/PEFT training code
 ```
 
 ## Limitations
