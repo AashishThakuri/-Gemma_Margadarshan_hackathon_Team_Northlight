@@ -4,36 +4,69 @@ import {
   useEffect,
   useRef,
   useState,
+  type ChangeEvent,
+  type DragEvent,
   type FormEvent,
-  type KeyboardEvent,
 } from "react";
 import styles from "./studio.module.css";
 
-type Message = {
-  id: number;
-  role: "verse" | "you";
-  text: string;
-};
+type InputMode = "link" | "upload";
+type Preview =
+  | { kind: "video"; src: string; title: string }
+  | { kind: "embed"; src: string; title: string }
+  | { kind: "linked"; src: string; title: string };
 
-const STARTER_MESSAGES: Message[] = [
-  {
-    id: 0,
-    role: "verse",
-    text: "Share a thought, a scene, or a line from your video.",
-  },
-];
-
-const SUGGESTIONS = [
-  "Shape a clean opening caption",
-  "Make this line easier to read",
-  "Turn a rough idea into a short script",
+const INPUT_MODES = [
+  { id: "link", label: "PASTE A LINK", number: "01" },
+  { id: "upload", label: "UPLOAD A VIDEO", number: "02" },
 ] as const;
 
-const RESPONSES = [
-  "Got it. I’m holding onto the meaning and clearing away the noise.",
-  "That has a strong rhythm. Let’s make every word arrive at the right moment.",
-  "I can work with that. The next pass will be shorter, clearer, and easier to follow.",
+const CAPTION_STYLES = [
+  "Clean and readable",
+  "Bold for short clips",
+  "Minimal for films",
 ] as const;
+
+function buildPreview(value: string): Preview | null {
+  try {
+    const url = new URL(value);
+    const host = url.hostname.replace(/^www\./, "");
+    const youtubeId =
+      host === "youtu.be"
+        ? url.pathname.split("/").filter(Boolean)[0]
+        : host.includes("youtube.com")
+          ? url.searchParams.get("v")
+          : null;
+
+    if (youtubeId) {
+      return {
+        kind: "embed",
+        src: `https://www.youtube-nocookie.com/embed/${youtubeId}`,
+        title: "YouTube video",
+      };
+    }
+
+    const vimeoMatch = host.includes("vimeo.com")
+      ? url.pathname.match(/\/(\d+)/)
+      : null;
+
+    if (vimeoMatch?.[1]) {
+      return {
+        kind: "embed",
+        src: `https://player.vimeo.com/video/${vimeoMatch[1]}`,
+        title: "Vimeo video",
+      };
+    }
+
+    if (/\.(mp4|webm|ogg|mov)(?:$|\?)/i.test(url.href)) {
+      return { kind: "video", src: url.href, title: "Linked video" };
+    }
+
+    return { kind: "linked", src: url.href, title: host };
+  } catch {
+    return null;
+  }
+}
 
 function ArrowIcon() {
   return (
@@ -45,168 +78,262 @@ function ArrowIcon() {
 }
 
 export default function TryVerse() {
-  const [messages, setMessages] = useState<Message[]>(STARTER_MESSAGES);
-  const [draft, setDraft] = useState("");
+  const fileInput = useRef<HTMLInputElement>(null);
+  const [mode, setMode] = useState<InputMode>("link");
+  const [videoLink, setVideoLink] = useState("");
+  const [preview, setPreview] = useState<Preview | null>(null);
+  const [error, setError] = useState("");
+  const [dragging, setDragging] = useState(false);
   const [isSending, setIsSending] = useState(false);
-  const replyTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const messageEnd = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    messageEnd.current?.scrollIntoView({ behavior: "smooth", block: "end" });
-  }, [messages, isSending]);
+  const [captionStyle, setCaptionStyle] =
+    useState<(typeof CAPTION_STYLES)[number]>(CAPTION_STYLES[0]);
 
   useEffect(() => {
     return () => {
-      if (replyTimer.current) {
-        clearTimeout(replyTimer.current);
+      if (preview?.kind === "video" && preview.src.startsWith("blob:")) {
+        URL.revokeObjectURL(preview.src);
       }
     };
-  }, []);
+  }, [preview]);
 
-  function sendMessage(text: string) {
-    const nextMessage = text.trim();
-    if (!nextMessage || isSending) {
+  function setVideoFile(file?: File) {
+    if (!file || !file.type.startsWith("video/")) {
+      setError("Choose a video file to continue.");
       return;
     }
 
-    const userMessage: Message = {
-      id: Date.now(),
-      role: "you",
-      text: nextMessage,
-    };
-
-    setMessages((current) => [...current, userMessage]);
-    setDraft("");
-    setIsSending(true);
-
-    replyTimer.current = setTimeout(() => {
-      const response =
-        RESPONSES[
-          Math.abs(nextMessage.length + messages.length) % RESPONSES.length
-        ];
-
-      setMessages((current) => [
-        ...current,
-        {
-          id: Date.now() + 1,
-          role: "verse",
-          text: response,
-        },
-      ]);
-      setIsSending(false);
-    }, 850);
-  }
-
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    sendMessage(draft);
-  }
-
-  function handleKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
-    if (event.key === "Enter" && !event.shiftKey) {
-      event.preventDefault();
-      sendMessage(draft);
+    if (preview?.kind === "video" && preview.src.startsWith("blob:")) {
+      URL.revokeObjectURL(preview.src);
     }
+
+    setPreview({
+      kind: "video",
+      src: URL.createObjectURL(file),
+      title: file.name,
+    });
+    setError("");
+    setIsSending(true);
+    window.setTimeout(() => setIsSending(false), 900);
+  }
+
+  function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
+    setVideoFile(event.target.files?.[0]);
+  }
+
+  function handleDrop(event: DragEvent<HTMLButtonElement>) {
+    event.preventDefault();
+    setDragging(false);
+    setVideoFile(event.dataTransfer.files?.[0]);
+  }
+
+  function submitLink(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const nextPreview = buildPreview(videoLink.trim());
+
+    if (!nextPreview) {
+      setError("Paste a complete video URL, including https://");
+      return;
+    }
+
+    setPreview(nextPreview);
+    setError("");
+    setIsSending(true);
+    window.setTimeout(() => setIsSending(false), 900);
+  }
+
+  function resetPreview() {
+    setPreview(null);
+    setVideoLink("");
+    setError("");
   }
 
   return (
     <main className={styles.page}>
-      <header className={styles.header}>
-        <a className={styles.brand} href="/" aria-label="Return to Verse home">
-          VERSE<span>.</span>
-        </a>
-        <p>WORDS, IN MOTION</p>
-        <a className={styles.close} href="/" aria-label="Close Try Verse">
-          <span />
-          <span />
-        </a>
-      </header>
+      <section className={styles.shell}>
+        <header className={styles.header}>
+          <a className={styles.brand} href="/" aria-label="Return to Verse home">
+            VERSE<span>.</span>
+          </a>
+          <p>VIDEO IN / WORDS OUT</p>
+          <a className={styles.close} href="/" aria-label="Close Try Verse">
+            <span />
+            <span />
+          </a>
+        </header>
 
-      <section className={styles.chat} aria-label="Verse conversation">
-        <div className={styles.intro}>
-          <p>NEW CONVERSATION / {String(messages.length).padStart(2, "0")}</p>
-          <h1>
-            What do you want
-            <span>to say?</span>
-          </h1>
-        </div>
+        <div className={styles.workspace}>
+          <section className={styles.statement}>
+            <p>CAPTION INTAKE / READY</p>
+            <h1>
+              Bring the
+              <span>video.</span>
+              Keep every word.
+            </h1>
+            <div className={styles.statementNote}>
+              <span>CC</span>
+              <p>
+                Start with a link or a file. Verse keeps the interface quiet so
+                the video stays in focus.
+              </p>
+            </div>
+          </section>
 
-        <div className={styles.messages} aria-live="polite">
-          {messages.map((message) => (
-            <article
-              className={`${styles.message} ${styles[message.role]}`}
-              key={message.id}
+          <section className={styles.intake}>
+            <div className={styles.modeSwitch} aria-label="Choose video source">
+              {INPUT_MODES.map((item) => (
+                <button
+                  aria-pressed={mode === item.id}
+                  className={mode === item.id ? styles.activeMode : ""}
+                  key={item.id}
+                  onClick={() => {
+                    setMode(item.id);
+                    setError("");
+                  }}
+                  type="button"
+                >
+                  <span>{item.number}</span>
+                  {item.label}
+                </button>
+              ))}
+            </div>
+
+            <div
+              className={`${styles.stage} ${
+                isSending ? styles.isSending : ""
+              }`}
             >
-              <span>{message.role === "verse" ? "VERSE" : "YOU"}</span>
-              <p>{message.text}</p>
-            </article>
-          ))}
+              <div className={styles.gradient} aria-hidden="true" />
 
-          {isSending ? (
-            <article className={`${styles.message} ${styles.verse}`}>
-              <span>VERSE</span>
-              <div className={styles.typing} aria-label="Verse is responding">
-                <i />
-                <i />
-                <i />
-              </div>
-            </article>
-          ) : null}
+              {preview ? (
+                <div className={styles.preview}>
+                  <header>
+                    <span>VIDEO READY</span>
+                    <strong>{preview.title}</strong>
+                    <button onClick={resetPreview} type="button">
+                      CHANGE
+                    </button>
+                  </header>
 
-          <div ref={messageEnd} />
-        </div>
+                  {preview.kind === "video" ? (
+                    <video controls src={preview.src}>
+                      Your browser does not support video playback.
+                    </video>
+                  ) : preview.kind === "embed" ? (
+                    <iframe
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                      src={preview.src}
+                      title={preview.title}
+                    />
+                  ) : (
+                    <div className={styles.linked}>
+                      <span>LINK RECEIVED</span>
+                      <strong>{preview.title}</strong>
+                      <p>
+                        The source is ready. Continue when the caption engine is
+                        connected.
+                      </p>
+                      <a href={preview.src} rel="noreferrer" target="_blank">
+                        OPEN SOURCE <ArrowIcon />
+                      </a>
+                    </div>
+                  )}
 
-        {messages.length === 1 ? (
-          <div className={styles.suggestions}>
-            {SUGGESTIONS.map((suggestion) => (
-              <button
-                key={suggestion}
-                onClick={() => setDraft(suggestion)}
-                type="button"
-              >
-                {suggestion}
-              </button>
-            ))}
-          </div>
-        ) : null}
+                  <div className={styles.captionDemo}>
+                    <span>LIVE CAPTION</span>
+                    <p>Every word arrives with the moment.</p>
+                  </div>
+                </div>
+              ) : mode === "link" ? (
+                <form className={styles.linkForm} onSubmit={submitLink}>
+                  <div className={styles.index}>01 / LINK</div>
+                  <div className={styles.linkCopy}>
+                    <p>SHARE ANY VIDEO URL</p>
+                    <h2>Paste it. We’ll take it from here.</h2>
+                  </div>
+                  <label htmlFor="video-url">
+                    <span>VIDEO URL</span>
+                    <input
+                      autoFocus
+                      id="video-url"
+                      onChange={(event) => setVideoLink(event.target.value)}
+                      placeholder="https://..."
+                      type="url"
+                      value={videoLink}
+                    />
+                  </label>
+                  <button
+                    aria-label="Use this video link"
+                    disabled={!videoLink.trim()}
+                    type="submit"
+                  >
+                    <span className={styles.arrowFront}>
+                      <ArrowIcon />
+                    </span>
+                    <span className={styles.arrowBack}>
+                      <ArrowIcon />
+                    </span>
+                  </button>
+                </form>
+              ) : (
+                <button
+                  className={`${styles.dropZone} ${
+                    dragging ? styles.isDragging : ""
+                  }`}
+                  onClick={() => fileInput.current?.click()}
+                  onDragEnter={() => setDragging(true)}
+                  onDragLeave={() => setDragging(false)}
+                  onDragOver={(event) => event.preventDefault()}
+                  onDrop={handleDrop}
+                  type="button"
+                >
+                  <span className={styles.dropIndex}>02 / FILE</span>
+                  <span className={styles.filmMark} aria-hidden="true">
+                    <i />
+                    <i />
+                    <i />
+                  </span>
+                  <strong>DROP A VIDEO HERE</strong>
+                  <p>OR CLICK TO BROWSE</p>
+                  <small>MP4 · MOV · WEBM</small>
+                </button>
+              )}
+            </div>
 
-        <form
-          className={`${styles.composer} ${
-            isSending ? styles.isSending : ""
-          }`}
-          onSubmit={handleSubmit}
-        >
-          <div className={styles.gradient} aria-hidden="true" />
-          <label htmlFor="verse-message">
-            <span>WRITE SOMETHING</span>
-            <textarea
-              autoFocus
-              id="verse-message"
-              onChange={(event) => setDraft(event.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Type a message..."
-              rows={1}
-              value={draft}
+            <div className={styles.options}>
+              <label htmlFor="caption-style">
+                <span>CAPTION STYLE</span>
+                <select
+                  id="caption-style"
+                  onChange={(event) =>
+                    setCaptionStyle(
+                      event.target.value as (typeof CAPTION_STYLES)[number],
+                    )
+                  }
+                  value={captionStyle}
+                >
+                  {CAPTION_STYLES.map((style) => (
+                    <option key={style}>{style}</option>
+                  ))}
+                </select>
+              </label>
+              <p>
+                <span>SESSION</span>
+                LOCAL / PRIVATE
+              </p>
+            </div>
+
+            {error ? <p className={styles.error}>{error}</p> : null}
+
+            <input
+              accept="video/*"
+              className={styles.fileInput}
+              onChange={handleFileChange}
+              ref={fileInput}
+              type="file"
             />
-          </label>
-          <button
-            aria-label="Send message"
-            disabled={!draft.trim() || isSending}
-            type="submit"
-          >
-            <span className={styles.arrowFront}>
-              <ArrowIcon />
-            </span>
-            <span className={styles.arrowBack}>
-              <ArrowIcon />
-            </span>
-          </button>
-        </form>
-
-        <footer className={styles.note}>
-          <span>ENTER TO SEND</span>
-          <span>SHIFT + ENTER FOR A NEW LINE</span>
-        </footer>
+          </section>
+        </div>
       </section>
     </main>
   );
