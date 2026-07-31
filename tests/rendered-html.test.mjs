@@ -58,12 +58,14 @@ test("server-renders the functional Try Verse video intake", async () => {
   assert.match(html, /Keep every word\./);
   assert.match(html, /PASTE A LINK/);
   assert.match(html, /UPLOAD A VIDEO/);
-  assert.match(html, /SHARE ANY VIDEO URL/);
-  assert.match(html, /https:\/\/\.\.\./);
+  assert.match(html, /Weather and Small Talk/);
+  assert.match(html, /nBpPe9UweWs/);
+  assert.match(html, />NEPALI<\/button>/);
+  assert.match(html, />MAITHILI<\/button>/);
+  assert.match(html, /CAPTIONS BEGIN WITH THE FIRST WORD/);
   assert.match(html, /CAPTION STYLE/);
   assert.match(html, /type="file"/);
   assert.doesNotMatch(html, /NEW CONVERSATION|Type a message|message bubbles/i);
-  assert.match(html, /type="submit"/);
 });
 
 test("keeps the requested typography and smooth-scroll dependencies local", async () => {

@@ -11,10 +11,89 @@ import {
 import styles from "./studio.module.css";
 
 type InputMode = "link" | "upload";
+type CaptionLanguage = "nepali" | "maithili";
 type Preview =
   | { kind: "video"; src: string; title: string }
-  | { kind: "embed"; src: string; title: string }
+  | { kind: "embed"; src: string; title: string; youtubeId?: string }
   | { kind: "linked"; src: string; title: string };
+
+type CaptionCue = {
+  start: number;
+  end: number;
+  text: string;
+};
+
+type YouTubePlayer = {
+  destroy: () => void;
+  getCurrentTime: () => number;
+};
+
+declare global {
+  interface Window {
+    YT?: {
+      Player: new (
+        element: HTMLIFrameElement,
+        options: { events: { onReady: () => void } },
+      ) => YouTubePlayer;
+    };
+    onYouTubeIframeAPIReady?: () => void;
+  }
+}
+
+const DEMO_VIDEO_ID = "nBpPe9UweWs";
+const DEMO_PREVIEW: Preview = {
+  kind: "embed",
+  src: `https://www.youtube-nocookie.com/embed/${DEMO_VIDEO_ID}?enablejsapi=1&rel=0&cc_load_policy=0`,
+  title: "Weather and Small Talk — 30 second demo",
+  youtubeId: DEMO_VIDEO_ID,
+};
+
+const DEMO_CAPTIONS: Record<CaptionLanguage, CaptionCue[]> = {
+  nepali: [
+    {
+      start: 4.97,
+      end: 8.969,
+      text: "ब्रर्र! आज त साह्रै जाडो छ। हो, अलि चिसो छ।",
+    },
+    {
+      start: 8.969,
+      end: 12.75,
+      text: "पच्चीस डिग्री छ। बेलायतमा यो कति हुन्थ्यो?",
+    },
+    {
+      start: 12.75,
+      end: 17.75,
+      text: "ओहो, शून्यभन्दा केही तल। तर म अङ्ग्रेज हुँ भनेर कसरी थाहा पाउनुभयो?",
+    },
+    {
+      start: 17.75,
+      end: 20.97,
+      text: "तपाईंको लवजबाट थाहा पाएँ। ओहो!",
+    },
+  ],
+  maithili: [
+    {
+      start: 4.97,
+      end: 8.969,
+      text: "बाप रे! आइ बहुत जाड़ अछि। हँ, कनिक ठंढ अछि।",
+    },
+    {
+      start: 8.969,
+      end: 12.75,
+      text: "पच्चीस डिग्री अछि। इंग्लैंडमे ई कतेक होइत?",
+    },
+    {
+      start: 12.75,
+      end: 17.75,
+      text: "ओह, शून्यसँ किछु कम। मुदा अहाँकेँ कोना बुझल जे हम अंग्रेज छी?",
+    },
+    {
+      start: 17.75,
+      end: 20.97,
+      text: "अहाँक लहजासँ बुझि गेलहुँ। ओह!",
+    },
+  ],
+};
 
 const INPUT_MODES = [
   { id: "link", label: "PASTE A LINK", number: "01" },
@@ -41,8 +120,9 @@ function buildPreview(value: string): Preview | null {
     if (youtubeId) {
       return {
         kind: "embed",
-        src: `https://www.youtube-nocookie.com/embed/${youtubeId}`,
+        src: `https://www.youtube-nocookie.com/embed/${youtubeId}?enablejsapi=1&rel=0&cc_load_policy=0`,
         title: "YouTube video",
+        youtubeId,
       };
     }
 
@@ -79,20 +159,106 @@ function ArrowIcon() {
 
 export default function TryVerse() {
   const fileInput = useRef<HTMLInputElement>(null);
+  const youtubeFrame = useRef<HTMLIFrameElement>(null);
+  const youtubePlayer = useRef<YouTubePlayer | null>(null);
+  const captionClock = useRef<number | null>(null);
+  const playbackTime = useRef(0);
+  const captionLanguageRef = useRef<CaptionLanguage>("nepali");
   const [mode, setMode] = useState<InputMode>("link");
   const [videoLink, setVideoLink] = useState("");
-  const [preview, setPreview] = useState<Preview | null>(null);
+  const [preview, setPreview] = useState<Preview | null>(DEMO_PREVIEW);
   const [error, setError] = useState("");
   const [dragging, setDragging] = useState(false);
   const [isSending, setIsSending] = useState(false);
+  const [captionLanguage, setCaptionLanguage] =
+    useState<CaptionLanguage>("nepali");
+  const [currentCaption, setCurrentCaption] = useState("");
   const [captionStyle, setCaptionStyle] =
     useState<(typeof CAPTION_STYLES)[number]>(CAPTION_STYLES[0]);
+
+  useEffect(() => {
+    captionLanguageRef.current = captionLanguage;
+    const cue = DEMO_CAPTIONS[captionLanguage].find(
+      ({ start, end }) =>
+        playbackTime.current >= start && playbackTime.current < end,
+    );
+    setCurrentCaption(cue?.text ?? "");
+  }, [captionLanguage]);
 
   useEffect(() => {
     return () => {
       if (preview?.kind === "video" && preview.src.startsWith("blob:")) {
         URL.revokeObjectURL(preview.src);
       }
+    };
+  }, [preview]);
+
+  useEffect(() => {
+    if (
+      preview?.kind !== "embed" ||
+      !preview.youtubeId ||
+      !youtubeFrame.current
+    ) {
+      setCurrentCaption("");
+      return;
+    }
+
+    let cancelled = false;
+
+    const syncCaption = () => {
+      try {
+        playbackTime.current = youtubePlayer.current?.getCurrentTime() ?? 0;
+        if (preview.youtubeId !== DEMO_VIDEO_ID) return;
+
+        const cue = DEMO_CAPTIONS[captionLanguageRef.current].find(
+          ({ start, end }) =>
+            playbackTime.current >= start && playbackTime.current < end,
+        );
+        setCurrentCaption((current) =>
+          current === (cue?.text ?? "") ? current : (cue?.text ?? ""),
+        );
+      } catch {
+        // The player may not be ready during its first few frames.
+      }
+    };
+
+    const connectPlayer = () => {
+      if (cancelled || !window.YT?.Player || !youtubeFrame.current) return;
+      youtubePlayer.current?.destroy();
+      youtubePlayer.current = new window.YT.Player(youtubeFrame.current, {
+        events: {
+          onReady: () => {
+            syncCaption();
+            captionClock.current = window.setInterval(syncCaption, 100);
+          },
+        },
+      });
+    };
+
+    if (window.YT?.Player) {
+      connectPlayer();
+    } else {
+      const previousReady = window.onYouTubeIframeAPIReady;
+      window.onYouTubeIframeAPIReady = () => {
+        previousReady?.();
+        connectPlayer();
+      };
+
+      if (!document.querySelector('script[src="https://www.youtube.com/iframe_api"]')) {
+        const script = document.createElement("script");
+        script.src = "https://www.youtube.com/iframe_api";
+        document.head.appendChild(script);
+      }
+    }
+
+    return () => {
+      cancelled = true;
+      if (captionClock.current !== null) {
+        window.clearInterval(captionClock.current);
+        captionClock.current = null;
+      }
+      youtubePlayer.current?.destroy();
+      youtubePlayer.current = null;
     };
   }, [preview]);
 
@@ -187,6 +353,7 @@ export default function TryVerse() {
                   key={item.id}
                   onClick={() => {
                     setMode(item.id);
+                    setPreview(null);
                     setError("");
                   }}
                   type="button"
@@ -222,6 +389,8 @@ export default function TryVerse() {
                     <iframe
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                       allowFullScreen
+                      key={preview.src}
+                      ref={preview.youtubeId ? youtubeFrame : undefined}
                       src={preview.src}
                       title={preview.title}
                     />
@@ -239,10 +408,48 @@ export default function TryVerse() {
                     </div>
                   )}
 
-                  <div className={styles.captionDemo}>
-                    <span>LIVE CAPTION</span>
-                    <p>Every word arrives with the moment.</p>
-                  </div>
+                  {preview.kind === "embed" &&
+                  preview.youtubeId === DEMO_VIDEO_ID ? (
+                    <>
+                      <div
+                        className={styles.languageSwitch}
+                        aria-label="Caption language"
+                      >
+                        {(["nepali", "maithili"] as const).map((language) => (
+                          <button
+                            aria-pressed={captionLanguage === language}
+                            className={
+                              captionLanguage === language
+                                ? styles.activeLanguage
+                                : ""
+                            }
+                            key={language}
+                            onClick={() => setCaptionLanguage(language)}
+                            type="button"
+                          >
+                            {language.toUpperCase()}
+                          </button>
+                        ))}
+                      </div>
+                      <div
+                        aria-live="polite"
+                        className={`${styles.captionDemo} ${
+                          currentCaption ? styles.captionActive : ""
+                        }`}
+                      >
+                        <span>LIVE / {captionLanguage.toUpperCase()}</span>
+                        <p>
+                          {currentCaption ||
+                            "PLAY THE VIDEO — CAPTIONS BEGIN WITH THE FIRST WORD"}
+                        </p>
+                      </div>
+                    </>
+                  ) : (
+                    <div className={styles.captionDemo}>
+                      <span>VIDEO READY</span>
+                      <p>Caption processing is ready for this source.</p>
+                    </div>
+                  )}
                 </div>
               ) : mode === "link" ? (
                 <form className={styles.linkForm} onSubmit={submitLink}>
