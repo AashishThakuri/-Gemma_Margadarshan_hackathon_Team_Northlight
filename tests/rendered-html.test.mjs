@@ -53,13 +53,13 @@ test("server-renders the functional Try Verse video intake", async () => {
   assert.equal(response.status, 200);
 
   const html = await response.text();
-  assert.match(html, /VIDEO IN \/ WORDS OUT/);
-  assert.match(html, /Bring the/);
-  assert.match(html, /Keep every word\./);
-  assert.match(html, /PASTE A LINK/);
-  assert.match(html, /UPLOAD A VIDEO/);
-  assert.match(html, /SHARE ANY VIDEO URL/);
-  assert.match(html, /https:\/\/\.\.\./);
+  assert.match(html, /CAPTION FIELD \/ 001/);
+  assert.match(html, /Your video\./);
+  assert.match(html, /Clear words\./);
+  assert.match(html, /PASTE VIDEO URL/);
+  assert.match(html, /UPLOAD VIDEO/);
+  assert.match(html, /SHARE A VIDEO URL/);
+  assert.match(html, /https:\/\/youtube\.com\/watch\?v=\.\.\./);
   assert.match(html, /CAPTION STYLE/);
   assert.match(html, /type="file"/);
   assert.doesNotMatch(html, /NEW CONVERSATION|Type a message|message bubbles/i);
