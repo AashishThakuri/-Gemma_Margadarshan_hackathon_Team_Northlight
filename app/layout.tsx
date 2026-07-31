@@ -6,7 +6,7 @@ import "@fontsource/dm-sans/600.css";
 import "@fontsource/fraunces/900.css";
 import "./globals.css";
 
-const SITE_TITLE = "Boli — Live Nepali & Maithili Captions";
+const SITE_TITLE = "Verse — Live Nepali & Maithili Captions";
 const SITE_DESCRIPTION =
   "Live, accessible captions for Nepali and Maithili video—clear, fast, and built for every screen.";
 

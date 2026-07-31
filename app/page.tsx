@@ -10,7 +10,7 @@ import type { CSSProperties, MouseEvent } from "react";
 
 const PRELOADER_WORDS = [
   {
-    label: "BOLI.",
+    label: "VERSE.",
     language: "IDENTITY",
     color: "#11110c",
     foreground: "#f3d9b9",
@@ -199,15 +199,6 @@ export default function Home() {
             ease: "power2.inOut",
           },
           0,
-        )
-        .to(
-          ".preloader-orbit",
-          {
-            rotate: reducedMotion ? 4 : 46,
-            duration: reducedMotion ? 0.7 : 4.1,
-            ease: "none",
-          },
-          0,
         );
 
       if (!reducedMotion) {
@@ -273,25 +264,15 @@ export default function Home() {
         });
       }
 
-      timeline
-        .to(
-          ".preloader-orbit",
-          {
-            scale: 1.16,
-            duration: reducedMotion ? 0.25 : 0.8,
-            ease: "power3.inOut",
-          },
-          reducedMotion ? 0.55 : 3.15,
-        )
-        .to(
-          root,
-          {
-            clipPath: "inset(0 0 100% 0 round 0 0 48% 48%)",
-            duration: reducedMotion ? 0.3 : 0.95,
-            ease: "power4.inOut",
-          },
-          reducedMotion ? 0.7 : 3.65,
-        );
+      timeline.to(
+        root,
+        {
+          clipPath: "inset(0 0 100% 0 round 0 0 48% 48%)",
+          duration: reducedMotion ? 0.3 : 0.95,
+          ease: "power4.inOut",
+        },
+        reducedMotion ? 0.7 : 3.65,
+      );
     }, root);
 
     return () => {
@@ -304,11 +285,11 @@ export default function Home() {
     gsap.registerPlugin(ScrollTrigger);
 
     const lenis = new Lenis({
-      duration: 1.15,
+      lerp: 0.16,
       smoothWheel: true,
       syncTouch: false,
-      touchMultiplier: 1.05,
-      wheelMultiplier: 0.86,
+      touchMultiplier: 1,
+      wheelMultiplier: 1,
     });
 
     const updateScrollTrigger = () => ScrollTrigger.update();
@@ -316,7 +297,7 @@ export default function Home() {
 
     lenis.on("scroll", updateScrollTrigger);
     gsap.ticker.add(tick);
-    gsap.ticker.lagSmoothing(0);
+    gsap.ticker.lagSmoothing(500, 33);
 
     if (isPreloading) {
       lenis.stop();
@@ -500,7 +481,7 @@ export default function Home() {
   useEffect(() => {
     const root = artworkRoot.current;
 
-    if (!root) {
+    if (!root || isPreloading) {
       return;
     }
 
@@ -533,12 +514,12 @@ export default function Home() {
       markerObserver.disconnect();
       scope.revert();
     };
-  }, []);
+  }, [isPreloading]);
 
   useEffect(() => {
     const root = aboutArtworkRoot.current;
 
-    if (!root) {
+    if (!root || isPreloading) {
       return;
     }
 
@@ -570,7 +551,7 @@ export default function Home() {
       markerObserver.disconnect();
       scope.revert();
     };
-  }, []);
+  }, [isPreloading]);
 
   return (
     <main
@@ -583,10 +564,10 @@ export default function Home() {
           className="preloader"
           ref={preloaderRoot}
           role="status"
-          aria-label="Loading Boli"
+          aria-label="Loading Verse"
         >
           <div className="preloader-meta">
-            <span>BOLI / LIVE CAPTION SYSTEM</span>
+            <span>VERSE / LIVE CAPTION SYSTEM</span>
             <span>LANGUAGE IS ARRIVING</span>
           </div>
 
@@ -599,20 +580,7 @@ export default function Home() {
             ))}
           </div>
 
-          <div className="preloader-orbit" aria-hidden="true">
-            <span style={{ "--orbit-angle": "-42deg" } as CSSProperties}>
-              HEAR
-            </span>
-            <span style={{ "--orbit-angle": "-14deg" } as CSSProperties}>
-              READ
-            </span>
-            <span style={{ "--orbit-angle": "14deg" } as CSSProperties}>
-              FOLLOW
-            </span>
-            <span style={{ "--orbit-angle": "42deg" } as CSSProperties}>
-              UNDERSTAND
-            </span>
-          </div>
+          <div className="preloader-orbit" aria-hidden="true" />
 
           <div className="preloader-progress">
             <span ref={preloaderCounter}>000</span>
@@ -624,10 +592,10 @@ export default function Home() {
         </div>
       )}
 
-      <section className="site-shell" aria-label="Boli live captioning">
+      <section className="site-shell" aria-label="Verse live captioning">
         <header className="navbar">
-          <a className="brand" href="#home" aria-label="Boli home">
-            BOLI<span>.</span>
+          <a className="brand" href="#home" aria-label="Verse home">
+            VERSE<span>.</span>
           </a>
 
           <nav className="desktop-nav" aria-label="Primary navigation">
@@ -639,7 +607,7 @@ export default function Home() {
           </nav>
 
           <a className="nav-cta" href="#features">
-            TRY BOLI
+            TRY VERSE
           </a>
 
           <details className="mobile-menu">
@@ -655,7 +623,7 @@ export default function Home() {
                 </a>
               ))}
               <a href="#features" onClick={closeMobileMenu}>
-                TRY BOLI
+                TRY VERSE
               </a>
             </nav>
           </details>
@@ -780,7 +748,7 @@ export default function Home() {
 
             <div className="about-text">
               <p>
-                Boli helps Nepali and Maithili speakers follow every kind of
+                Verse helps Nepali and Maithili speakers follow every kind of
                 video without missing the moment. It listens as content plays
                 and turns speech into clear, readable captions in real time.
               </p>
@@ -838,7 +806,7 @@ export default function Home() {
               FINAL CAPTION / 00:00:00
             </p>
             <h2>
-              BOLI<span>.</span>
+              VERSE<span>.</span>
             </h2>
           </div>
 
@@ -848,7 +816,7 @@ export default function Home() {
           </div>
 
           <div className="footer-bottom">
-            <p>© 2026 BOLI. ALL RIGHTS RESERVED.</p>
+            <p>© 2026 VERSE. ALL RIGHTS RESERVED.</p>
             <p>THE VIDEO MOVES. UNDERSTANDING STAYS.</p>
           </div>
         </footer>

@@ -75,11 +75,12 @@ body::before {
 }
 
 body::after {
+  inset: -4%;
   background: url("/film-grain-35mm.png") repeat;
-  background-size: 15rem 15rem;
-  opacity: 0.3;
+  background-size: 14rem 14rem;
+  opacity: 0.24;
   mix-blend-mode: soft-light;
-  animation: film-grain 0.16s steps(2, end) infinite;
+  transform: translateZ(0);
 }
 
 a {
@@ -94,6 +95,10 @@ a {
 
 .page.is-preloading .site-shell {
   visibility: hidden;
+}
+
+.page.is-preloading .feature-disc-motion {
+  animation-play-state: paused;
 }
 
 .preloader {
@@ -193,8 +198,6 @@ a {
   border-radius: 50%;
   opacity: 0.52;
   transform: translateX(50%);
-  transform-origin: center;
-  will-change: transform;
 }
 
 .preloader-orbit::before,
@@ -213,37 +216,6 @@ a {
 .preloader-orbit::after {
   inset: 2.35rem;
   border-style: dashed;
-}
-
-.preloader-orbit > span {
-  position: absolute;
-  top: 1.6rem;
-  font-family: var(--font-mono);
-  font-size: clamp(0.55rem, 0.72vw, 0.7rem);
-  font-weight: 700;
-  letter-spacing: 0.11em;
-}
-
-.preloader-orbit > span:nth-child(1) {
-  left: 18%;
-  transform: rotate(-24deg);
-}
-
-.preloader-orbit > span:nth-child(2) {
-  top: -0.2rem;
-  left: 38%;
-  transform: rotate(-8deg);
-}
-
-.preloader-orbit > span:nth-child(3) {
-  top: -0.2rem;
-  right: 36%;
-  transform: rotate(8deg);
-}
-
-.preloader-orbit > span:nth-child(4) {
-  right: 15%;
-  transform: rotate(24deg);
 }
 
 .preloader-progress {
@@ -991,32 +963,6 @@ h1 span i {
 @keyframes feature-disc-spin {
   to {
     transform: rotate(1turn);
-  }
-}
-
-@keyframes film-grain {
-  0% {
-    transform: translate(0, 0);
-  }
-
-  20% {
-    transform: translate(-3%, 2%);
-  }
-
-  40% {
-    transform: translate(2%, -3%);
-  }
-
-  60% {
-    transform: translate(-1%, -2%);
-  }
-
-  80% {
-    transform: translate(3%, 3%);
-  }
-
-  100% {
-    transform: translate(-2%, 1%);
   }
 }
 
