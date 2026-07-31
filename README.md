@@ -13,7 +13,7 @@ Multilingual speech recognition, translation, and live captions for English, Nep
 
 </div>
 
-![Verse landing page](public/verse-landing.png)
+![Verse landing page](frontend/public/verse-landing.png)
 
 ## Overview
 
@@ -73,7 +73,7 @@ The source corpus is [`Firoj112/chatterbox-multilingual-data`](https://huggingfa
 | Maithili | 19,784 |
 | **Total** | **66,814** |
 
-![VERSE V2 clean training clips by source language](public/verse-v2-training-data.png)
+![VERSE V2 clean training clips by source language](frontend/public/verse-v2-training-data.png)
 
 Each clean source clip produced three supervised tasks:
 
@@ -143,7 +143,7 @@ The final V2 adapter was completed at optimizer step **12,761**. The adapter for
 
 In this comparison run, fine-tuning reduced relative WER by approximately **54.9%** and relative CER by approximately **67.3%**.
 
-![Original and fine-tuned Gemma error comparison](public/gemma-error-comparison.png)
+![Original and fine-tuned Gemma error comparison](frontend/public/gemma-error-comparison.png)
 
 ### Quick V2 validation
 
@@ -207,6 +207,7 @@ This repository contains the Verse web experience and hackathon caption demo. Th
 ```bash
 git clone https://github.com/AashishThakuri/-Gemma_Margadarshan_hackathon_Team_Northlight.git
 cd -- -Gemma_Margadarshan_hackathon_Team_Northlight
+cd frontend
 npm install
 npm run dev
 ```
@@ -222,13 +223,15 @@ npm test
 ## Project structure
 
 ```text
-app/
-|-- page.tsx              # Landing, About, Features, and footer
-|-- try-verse/page.tsx    # Video/audio intake and caption demo
-`-- globals.css           # Shared responsive visual system
-public/                   # Artwork, screenshots, and evaluation graphs
-tests/                    # Rendered-page smoke tests
-worker/                   # Cloudflare-compatible worker entry
+frontend/
+|-- app/
+|   |-- page.tsx              # Landing, About, Features, and footer
+|   `-- try-verse/page.tsx    # Video/audio intake and caption demo
+|-- public/                   # Artwork, screenshots, and evaluation graphs
+|-- tests/                    # Rendered-page smoke tests
+`-- worker/                   # Cloudflare-compatible worker entry
+backend/
+`-- README.md                 # Caption API contract and model-service scope
 ```
 
 ## Limitations
