@@ -17,8 +17,8 @@ type Preview =
   | { kind: "linked"; src: string; title: string };
 
 const INPUT_MODES = [
-  { id: "link", label: "PASTE VIDEO URL" },
-  { id: "upload", label: "UPLOAD VIDEO" },
+  { id: "link", label: "Video link" },
+  { id: "upload", label: "Upload" },
 ] as const;
 
 const CAPTION_STYLES = [
@@ -30,6 +30,7 @@ const CAPTION_STYLES = [
 
 const VERTEX_SHADER = `
 attribute vec2 position;
+
 void main() {
   gl_Position = vec4(position, 0.0, 1.0);
 }
@@ -42,39 +43,40 @@ uniform vec2 resolution;
 uniform float elapsed;
 uniform float seed;
 
-float randomValue(vec2 point) {
-  return fract(sin(dot(point + seed, vec2(12.9898, 78.233))) * 43758.5453);
+float noise(vec2 point) {
+  return fract(sin(dot(point + seed, vec2(12.9898, 78.233))) * 43758.5453123);
 }
 
-vec3 ribbonPalette(float value) {
+vec3 palette(float position) {
   vec3 whiteColor = vec3(1.0);
   vec3 skyColor = vec3(0.470588, 0.721569, 0.976471);
   vec3 ultramarineColor = vec3(0.337255, 0.403922, 1.0);
   vec3 irisColor = vec3(0.301961, 0.184314, 0.976471);
 
   vec3 color = whiteColor;
-  color = mix(color, skyColor, smoothstep(0.3318, 0.3786, value));
-  color = mix(color, ultramarineColor, smoothstep(0.5814, 0.5886, value));
-  color = mix(color, irisColor, smoothstep(0.7964, 0.8000, value));
+  color = mix(color, skyColor, smoothstep(0.3318, 0.3786, position));
+  color = mix(color, ultramarineColor, smoothstep(0.5814, 0.5886, position));
+  color = mix(color, irisColor, smoothstep(0.7964, 0.8000, position));
   return color;
 }
 
 void main() {
   vec2 uv = gl_FragCoord.xy / resolution.xy;
-  vec2 centered = uv - 0.5;
-  centered.x *= resolution.x / resolution.y;
+  vec2 cssUv = vec2(uv.x, 1.0 - uv.y);
 
-  float ph = elapsed * 1.0;
+  float t = elapsed;
+  float ph = t * 1.0;
   float amt = 0.0;
   float direction = 1.0;
   float spin = ph * direction;
   float angle = 38.0 + sin(spin * 0.6) * 28.0 * amt;
-  float angleRadians = radians(angle);
+  float radiansAngle = radians(angle);
 
-  vec2 fieldAxis = vec2(cos(angleRadians), sin(angleRadians));
-  vec2 crossAxis = vec2(-sin(angleRadians), cos(angleRadians));
-  float along = dot(centered, fieldAxis);
-  float cross = dot(centered, crossAxis);
+  vec2 fieldAxis = normalize(vec2(sin(radiansAngle), cos(radiansAngle)));
+  vec2 crossAxis = vec2(fieldAxis.y, -fieldAxis.x);
+  float axisSpan = fieldAxis.x + fieldAxis.y;
+  float along = dot(cssUv, fieldAxis) / axisSpan;
+  float cross = dot(cssUv - 0.5, crossAxis);
 
   float waveClock = 20.75 + ph * 1.2;
   float waveOffset =
@@ -82,11 +84,14 @@ void main() {
     0.35 *
     sin(cross * 2.4 * 6.28318530718 + waveClock);
 
-  float position = clamp((along / 0.68) + 0.5 + waveOffset, 0.0, 1.0);
-  vec3 color = ribbonPalette(position);
+  float fieldPosition = clamp(along + waveOffset, 0.0, 1.0);
+  vec3 color = palette(fieldPosition);
 
-  float grain = randomValue(floor(gl_FragCoord.xy));
-  color += (grain - 0.5) * 0.085;
+  vec2 grainCell = floor(gl_FragCoord.xy);
+  float fineGrain = noise(grainCell);
+  float softGrain = noise(floor(grainCell * 0.48) + 31.7);
+  float texture = ((fineGrain - 0.5) * 0.105) + ((softGrain - 0.5) * 0.025);
+  color += texture;
 
   gl_FragColor = vec4(clamp(color, 0.0, 1.0), 1.0);
 }
@@ -168,18 +173,18 @@ function RibbonField() {
 
     const resize = () => {
       const pixelRatio = Math.min(window.devicePixelRatio || 1, 1.5);
-      const nextWidth = Math.floor(canvas.clientWidth * pixelRatio);
-      const nextHeight = Math.floor(canvas.clientHeight * pixelRatio);
+      const width = Math.floor(canvas.clientWidth * pixelRatio);
+      const height = Math.floor(canvas.clientHeight * pixelRatio);
 
-      if (canvas.width !== nextWidth || canvas.height !== nextHeight) {
-        canvas.width = nextWidth;
-        canvas.height = nextHeight;
-        gl.viewport(0, 0, nextWidth, nextHeight);
-        gl.uniform2f(resolutionLocation, nextWidth, nextHeight);
+      if (canvas.width !== width || canvas.height !== height) {
+        canvas.width = width;
+        canvas.height = height;
+        gl.viewport(0, 0, width, height);
+        gl.uniform2f(resolutionLocation, width, height);
       }
     };
 
-    const reduceMotion = window.matchMedia(
+    const reducedMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
     ).matches;
     const startTime = performance.now();
@@ -187,11 +192,11 @@ function RibbonField() {
 
     const draw = (now: number) => {
       resize();
-      const elapsedSeconds = reduceMotion ? 0 : (now - startTime) / 1000;
+      const elapsedSeconds = reducedMotion ? 0 : (now - startTime) / 1000;
       gl.uniform1f(elapsedLocation, elapsedSeconds);
       gl.drawArrays(gl.TRIANGLES, 0, 6);
 
-      if (!reduceMotion) {
+      if (!reducedMotion) {
         animationFrame = requestAnimationFrame(draw);
       }
     };
@@ -257,15 +262,6 @@ function buildPreview(value: string): Preview | null {
   }
 }
 
-function ArrowIcon() {
-  return (
-    <svg aria-hidden="true" viewBox="0 0 24 24">
-      <path d="M5 19 19 5" />
-      <path d="M8 5h11v11" />
-    </svg>
-  );
-}
-
 export default function TryVerse() {
   const fileInput = useRef<HTMLInputElement>(null);
   const sendTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -295,7 +291,7 @@ export default function TryVerse() {
     if (sendTimer.current) {
       clearTimeout(sendTimer.current);
     }
-    sendTimer.current = setTimeout(() => setIsSending(false), 950);
+    sendTimer.current = setTimeout(() => setIsSending(false), 900);
   }
 
   function setVideoFile(file?: File) {
@@ -355,34 +351,38 @@ export default function TryVerse() {
         <a className={styles.brand} href="/" aria-label="Return to Verse home">
           VERSE<span>.</span>
         </a>
-        <p>CAPTION FIELD / 001</p>
-        <a className={styles.close} href="/" aria-label="Close Try Verse">
-          CLOSE ↗
+        <p className={styles.status}>
+          <i aria-hidden="true" />
+          LIVE CAPTION STUDIO
+        </p>
+        <a className={styles.close} href="/">
+          BACK TO FILM <span aria-hidden="true">↗</span>
         </a>
       </header>
 
-      <section className={styles.hero}>
+      <section className={styles.stage}>
         <div className={styles.intro}>
-          <p>VIDEO ENTERS HERE</p>
+          <p>VOICE, MADE VISIBLE</p>
           <h1>
-            Your video.
-            <span>Clear words.</span>
+            Make every frame
+            <em>understood.</em>
           </h1>
           <small>
-            Drop a file or share a link. Verse prepares the space where every
-            spoken moment can be followed.
+            Bring the video. Verse gives every spoken moment somewhere clear
+            to land.
           </small>
         </div>
 
+        <div className={styles.captionSlip} aria-hidden="true">
+          <span>00:00:08</span>
+          Every word arrives with the moment.
+        </div>
+
         <section
-          className={`${styles.console} ${
-            isSending ? styles.isSending : ""
-          }`}
+          className={`${styles.dock} ${isSending ? styles.isSending : ""}`}
           aria-label="Add a video"
         >
-          <div className={styles.consoleGlow} aria-hidden="true" />
-
-          <header className={styles.consoleHeader}>
+          <header className={styles.dockHeader}>
             <div className={styles.modeSwitch}>
               {INPUT_MODES.map((item) => (
                 <button
@@ -399,10 +399,10 @@ export default function TryVerse() {
                 </button>
               ))}
             </div>
-            <span>{preview ? "SOURCE READY" : "WAITING FOR SOURCE"}</span>
+            <span>{preview ? "SOURCE READY" : "CHOOSE A SOURCE"}</span>
           </header>
 
-          <div className={styles.consoleBody}>
+          <div className={styles.dockBody}>
             {preview ? (
               <div className={styles.preview}>
                 <header>
@@ -411,7 +411,7 @@ export default function TryVerse() {
                     <strong>{preview.title}</strong>
                   </div>
                   <button onClick={resetPreview} type="button">
-                    CHANGE SOURCE
+                    CHANGE
                   </button>
                 </header>
 
@@ -432,7 +432,7 @@ export default function TryVerse() {
                       <span>LINK CONNECTED</span>
                       <strong>{preview.title}</strong>
                       <a href={preview.src} rel="noreferrer" target="_blank">
-                        VIEW SOURCE <ArrowIcon />
+                        VIEW SOURCE <i aria-hidden="true">↗</i>
                       </a>
                     </div>
                   )}
@@ -445,12 +445,12 @@ export default function TryVerse() {
             ) : mode === "link" ? (
               <form className={styles.linkForm} onSubmit={submitLink}>
                 <label htmlFor="video-url">
-                  <span>SHARE A VIDEO URL</span>
+                  <span>PASTE ANY VIDEO LINK</span>
                   <input
                     autoFocus
                     id="video-url"
                     onChange={(event) => setVideoLink(event.target.value)}
-                    placeholder="https://youtube.com/watch?v=..."
+                    placeholder="youtube.com / vimeo.com / direct video"
                     type="url"
                     value={videoLink}
                   />
@@ -460,12 +460,8 @@ export default function TryVerse() {
                   disabled={!videoLink.trim()}
                   type="submit"
                 >
-                  <span className={styles.arrowFront}>
-                    <ArrowIcon />
-                  </span>
-                  <span className={styles.arrowBack}>
-                    <ArrowIcon />
-                  </span>
+                  <span className={styles.arrowFront}>↗</span>
+                  <span className={styles.arrowBack}>↗</span>
                 </button>
               </form>
             ) : (
@@ -480,21 +476,20 @@ export default function TryVerse() {
                 onDrop={handleDrop}
                 type="button"
               >
-                <span className={styles.dropMark} aria-hidden="true">
-                  <i />
-                  <i />
+                <span className={styles.dropIcon} aria-hidden="true">
                   <i />
                 </span>
-                <strong>DROP YOUR VIDEO</strong>
-                <p>OR CLICK TO CHOOSE A FILE</p>
-                <small>MP4 · MOV · WEBM</small>
+                <span>
+                  <strong>DROP A VIDEO HERE</strong>
+                  <small>or choose from your device · MP4 · MOV · WEBM</small>
+                </span>
               </button>
             )}
           </div>
 
-          <footer className={styles.consoleFooter}>
+          <footer className={styles.dockFooter}>
             <label htmlFor="caption-style">
-              <span>CAPTION STYLE</span>
+              CAPTION LOOK
               <select
                 id="caption-style"
                 onChange={(event) =>
@@ -509,10 +504,7 @@ export default function TryVerse() {
                 ))}
               </select>
             </label>
-            <p>
-              <span>SESSION</span>
-              PRIVATE / LOCAL
-            </p>
+            <p>PRIVATE ON THIS DEVICE</p>
           </footer>
 
           {error ? <p className={styles.error}>{error}</p> : null}
@@ -520,8 +512,8 @@ export default function TryVerse() {
       </section>
 
       <footer className={styles.pageFooter}>
-        <span>VERSE / LIVE CAPTION SYSTEM</span>
-        <span>PASTE · UPLOAD · FOLLOW</span>
+        <span>VERSE / 2026</span>
+        <span>PRESS PLAY. FOLLOW THE MOMENT.</span>
       </footer>
 
       <input

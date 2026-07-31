@@ -48,19 +48,19 @@ test("server-renders the Verse landing page", async () => {
   assert.doesNotMatch(html, /codex-preview|react-loading-skeleton/i);
 });
 
-test("server-renders the functional Try Verse video intake", async () => {
+test("server-renders the functional Try Verse caption stage", async () => {
   const response = await render("/try-verse");
   assert.equal(response.status, 200);
 
   const html = await response.text();
-  assert.match(html, /CAPTION FIELD \/ 001/);
-  assert.match(html, /Your video\./);
-  assert.match(html, /Clear words\./);
-  assert.match(html, /PASTE VIDEO URL/);
-  assert.match(html, /UPLOAD VIDEO/);
-  assert.match(html, /SHARE A VIDEO URL/);
-  assert.match(html, /https:\/\/youtube\.com\/watch\?v=\.\.\./);
-  assert.match(html, /CAPTION STYLE/);
+  assert.match(html, /LIVE CAPTION STUDIO/);
+  assert.match(html, /Make every frame/);
+  assert.match(html, /understood\./);
+  assert.match(html, />Video link</);
+  assert.match(html, />Upload</);
+  assert.match(html, /PASTE ANY VIDEO LINK/);
+  assert.match(html, /youtube\.com \/ vimeo\.com \/ direct video/);
+  assert.match(html, /CAPTION LOOK/);
   assert.match(html, /type="file"/);
   assert.doesNotMatch(html, /NEW CONVERSATION|Type a message|message bubbles/i);
   assert.match(html, /type="submit"/);
