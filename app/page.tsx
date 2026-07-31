@@ -598,13 +598,13 @@ export default function Home() {
 
           <nav className="desktop-nav" aria-label="Primary navigation">
             {NAVIGATION.map((item) => (
-              <a key={item.label} href={item.href}>
+              <a className="nav-text-mono" key={item.label} href={item.href}>
                 {item.label}
               </a>
             ))}
           </nav>
 
-          <a className="nav-cta" href="#features">
+          <a className="nav-cta nav-text-mono" href="#features">
             TRY VERSE
           </a>
 
@@ -616,11 +616,20 @@ export default function Home() {
             </summary>
             <nav aria-label="Mobile navigation">
               {NAVIGATION.map((item) => (
-                <a key={item.label} href={item.href} onClick={closeMobileMenu}>
+                <a
+                  className="nav-text-mono"
+                  key={item.label}
+                  href={item.href}
+                  onClick={closeMobileMenu}
+                >
                   {item.label}
                 </a>
               ))}
-              <a href="#features" onClick={closeMobileMenu}>
+              <a
+                className="nav-text-mono"
+                href="#features"
+                onClick={closeMobileMenu}
+              >
                 TRY VERSE
               </a>
             </nav>

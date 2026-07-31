@@ -36,7 +36,10 @@ test("server-renders the Verse landing page", async () => {
   assert.match(html, />छंद<\/span><small>HINDI \/ VERSE<\/small>/);
   assert.match(html, />詩<\/span><small>JAPANESE \/ VERSE<\/small>/);
   assert.match(html, /<nav class="desktop-nav" aria-label="Primary navigation">/);
-  assert.match(html, /class="nav-cta" href="#features">TRY VERSE<\/a>/);
+  assert.match(
+    html,
+    /class="nav-cta nav-text-mono" href="#features">TRY VERSE<\/a>/,
+  );
   assert.doesNotMatch(html, /codex-preview|react-loading-skeleton/i);
 });
 
@@ -50,6 +53,7 @@ test("keeps the requested typography and smooth-scroll dependencies local", asyn
 
   assert.match(css, /--font-mono:\s*"Space Mono"/);
   assert.match(css, /\.desktop-nav a,\s*\n\.nav-cta\s*\{[^}]*var\(--font-mono\)/s);
+  assert.match(css, /\.nav-text-mono\s*\{[^}]*var\(--font-mono\)/s);
   assert.match(css, /\.about-text p\s*\{[^}]*var\(--font-mono\)/s);
   assert.match(layout, /@fontsource\/space-mono\/400\.css/);
   assert.match(layout, /@fontsource\/space-mono\/700\.css/);
