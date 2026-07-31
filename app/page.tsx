@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { animate, createScope } from "animejs";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { CSSProperties, MouseEvent } from "react";
 
 const ARTWORK_SIZE = { width: 783, height: 830 } as const;
@@ -103,6 +103,24 @@ function observeArtworkMarkers(
 export default function Home() {
   const artworkRoot = useRef<HTMLElement>(null);
   const aboutArtworkRoot = useRef<HTMLDivElement>(null);
+  const heroRoot = useRef<HTMLDivElement>(null);
+  const [showFloatingNavigation, setShowFloatingNavigation] = useState(false);
+
+  useEffect(() => {
+    const hero = heroRoot.current;
+
+    if (!hero) {
+      return;
+    }
+
+    const heroObserver = new IntersectionObserver(
+      ([entry]) => setShowFloatingNavigation(!entry.isIntersecting),
+      { threshold: 0 },
+    );
+
+    heroObserver.observe(hero);
+    return () => heroObserver.disconnect();
+  }, []);
 
   useEffect(() => {
     const root = artworkRoot.current;
@@ -218,7 +236,7 @@ export default function Home() {
           </details>
         </header>
 
-        <div className="hero">
+        <div className="hero" ref={heroRoot}>
           <section className="message-panel">
             <div className="headline-box">
               <h1>
@@ -377,48 +395,49 @@ export default function Home() {
         </section>
 
         <footer className="site-footer" id="contact">
-          <div className="footer-caption-card">
-            <div className="footer-caption-meta">
-              <span>CC / FINAL FRAME</span>
-              <span>00:00:00</span>
-            </div>
-            <p className="footer-caption-copy">
-              <span>THE VIDEO ENDS.</span>
-              <strong>THE WORDS STAY.</strong>
-              <i aria-hidden="true" />
+          <div className="footer-brand-lockup">
+            <p>
+              <span aria-hidden="true" />
+              FINAL CAPTION / 00:00:00
             </p>
+            <h2>
+              BOLI<span>.</span>
+            </h2>
           </div>
 
-          <a className="footer-top-link" href="#home" aria-label="Back to start">
-            <span aria-hidden="true">↑</span>
-            <small>BACK TO START</small>
-          </a>
+          <div className="footer-caption-line">
+            <p>EVERY WORD, RIGHT WHEN IT MATTERS.</p>
+            <i aria-hidden="true" />
+          </div>
 
           <div className="footer-bottom">
             <p>© 2026 BOLI. ALL RIGHTS RESERVED.</p>
-            <p>LIVE CAPTIONS, RIGHT ON TIME.</p>
+            <p>THE VIDEO MOVES. UNDERSTANDING STAYS.</p>
           </div>
         </footer>
 
-        <details className="floating-navigation">
-          <summary aria-label="Open page navigation">
-            <span />
-            <span />
-            <span />
-          </summary>
-          <nav aria-label="Floating page navigation">
-            <a href="#home" onClick={closeMobileMenu}>
-              <span>01</span>
-              HOME
-            </a>
-            {NAVIGATION.map((item, index) => (
-              <a href={item.href} key={item.href} onClick={closeMobileMenu}>
-                <span>{String(index + 2).padStart(2, "0")}</span>
-                {item.label}
+        {showFloatingNavigation && (
+          <details className="floating-navigation">
+            <summary aria-label="Open page navigation">
+              <span className="floating-navigation-icon" aria-hidden="true">
+                <i />
+                <i />
+              </span>
+            </summary>
+            <nav aria-label="Floating page navigation">
+              <a href="#home" onClick={closeMobileMenu}>
+                <span>01</span>
+                HOME
               </a>
-            ))}
-          </nav>
-        </details>
+              {NAVIGATION.map((item, index) => (
+                <a href={item.href} key={item.href} onClick={closeMobileMenu}>
+                  <span>{String(index + 2).padStart(2, "0")}</span>
+                  {item.label}
+                </a>
+              ))}
+            </nav>
+          </details>
+        )}
       </section>
     </main>
   );
