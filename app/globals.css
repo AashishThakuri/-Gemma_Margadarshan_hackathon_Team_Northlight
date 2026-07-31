@@ -26,7 +26,7 @@
 }
 
 html {
-  scroll-behavior: smooth;
+  scroll-behavior: auto;
 }
 
 body {
@@ -35,6 +35,27 @@ body {
   background: var(--border-coral);
   color: var(--ink);
   font-family: var(--font-body);
+}
+
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: clip;
+}
+
+body.is-loading {
+  overflow: hidden;
 }
 
 body::before,
@@ -69,6 +90,196 @@ a {
 .page {
   min-height: 100svh;
   padding: var(--frame-gap);
+}
+
+.page.is-preloading .site-shell {
+  visibility: hidden;
+}
+
+.preloader {
+  position: fixed;
+  z-index: 1000;
+  inset: 0;
+  overflow: hidden;
+  background: var(--ink);
+  clip-path: inset(0 0 0 0 round 0);
+  color: var(--cream);
+  perspective: 75rem;
+}
+
+.preloader::before,
+.preloader::after {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 0.08rem;
+  background: currentcolor;
+  content: "";
+  opacity: 0.28;
+  pointer-events: none;
+}
+
+.preloader::before {
+  left: clamp(1.1rem, 4vw, 4rem);
+}
+
+.preloader::after {
+  right: clamp(1.1rem, 4vw, 4rem);
+}
+
+.preloader-meta {
+  position: absolute;
+  z-index: 3;
+  top: clamp(1.5rem, 3vw, 2.8rem);
+  right: clamp(1.7rem, 5vw, 5.2rem);
+  left: clamp(1.7rem, 5vw, 5.2rem);
+  display: flex;
+  padding-bottom: 0.75rem;
+  justify-content: space-between;
+  gap: 2rem;
+  border-bottom: 0.08rem solid currentcolor;
+  font-family: var(--font-mono);
+  font-size: clamp(0.56rem, 0.75vw, 0.72rem);
+  letter-spacing: 0.09em;
+}
+
+.preloader-word-stage {
+  position: absolute;
+  z-index: 4;
+  inset: 0;
+  display: grid;
+  padding: 4.5rem clamp(1.5rem, 5vw, 5rem);
+  place-items: center;
+  perspective: 75rem;
+}
+
+.preloader-word {
+  position: absolute;
+  display: grid;
+  width: min(90%, 82rem);
+  margin: 0;
+  place-items: center;
+  text-align: center;
+  will-change: transform, opacity;
+}
+
+.preloader-word > span {
+  display: block;
+  font-family: var(--font-display), "Nirmala UI", sans-serif;
+  font-size: clamp(4.2rem, 12vw, 14rem);
+  font-weight: 900;
+  letter-spacing: -0.075em;
+  line-height: 0.78;
+  white-space: nowrap;
+}
+
+.preloader-word small {
+  display: block;
+  margin-top: 1.3rem;
+  font-family: var(--font-mono);
+  font-size: clamp(0.62rem, 0.95vw, 0.92rem);
+  font-weight: 700;
+  letter-spacing: 0.16em;
+}
+
+.preloader-orbit {
+  position: absolute;
+  z-index: 2;
+  right: 50%;
+  bottom: clamp(-69rem, -58vw, -38rem);
+  width: min(92rem, 142vw);
+  aspect-ratio: 1;
+  border: 0.1rem solid currentcolor;
+  border-radius: 50%;
+  opacity: 0.52;
+  transform: translateX(50%);
+  transform-origin: center;
+  will-change: transform;
+}
+
+.preloader-orbit::before,
+.preloader-orbit::after {
+  position: absolute;
+  border: 0.08rem solid currentcolor;
+  border-radius: 50%;
+  content: "";
+  opacity: 0.4;
+}
+
+.preloader-orbit::before {
+  inset: 1.2rem;
+}
+
+.preloader-orbit::after {
+  inset: 2.35rem;
+  border-style: dashed;
+}
+
+.preloader-orbit > span {
+  position: absolute;
+  top: 1.6rem;
+  font-family: var(--font-mono);
+  font-size: clamp(0.55rem, 0.72vw, 0.7rem);
+  font-weight: 700;
+  letter-spacing: 0.11em;
+}
+
+.preloader-orbit > span:nth-child(1) {
+  left: 18%;
+  transform: rotate(-24deg);
+}
+
+.preloader-orbit > span:nth-child(2) {
+  top: -0.2rem;
+  left: 38%;
+  transform: rotate(-8deg);
+}
+
+.preloader-orbit > span:nth-child(3) {
+  top: -0.2rem;
+  right: 36%;
+  transform: rotate(8deg);
+}
+
+.preloader-orbit > span:nth-child(4) {
+  right: 15%;
+  transform: rotate(24deg);
+}
+
+.preloader-progress {
+  position: absolute;
+  z-index: 5;
+  right: clamp(1.7rem, 5vw, 5.2rem);
+  bottom: clamp(1.5rem, 3vw, 2.8rem);
+  left: clamp(1.7rem, 5vw, 5.2rem);
+  display: grid;
+  align-items: center;
+  gap: 0.8rem;
+  grid-template-columns: 2.3rem minmax(0, 1fr) 2.3rem;
+  font-family: var(--font-mono);
+  font-size: clamp(0.56rem, 0.75vw, 0.72rem);
+  letter-spacing: 0.08em;
+}
+
+.preloader-progress > span:last-child {
+  text-align: right;
+}
+
+.preloader-progress > div {
+  height: 0.12rem;
+  overflow: hidden;
+  background: currentcolor;
+  opacity: 0.45;
+}
+
+.preloader-progress-fill {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: currentcolor;
+  opacity: 1;
+  transform: scaleX(0);
+  transform-origin: left;
 }
 
 .site-shell {
@@ -195,7 +406,14 @@ h1 {
 
 h1 span {
   display: block;
+  overflow: hidden;
   white-space: nowrap;
+}
+
+h1 span i {
+  display: block;
+  font-style: normal;
+  will-change: transform;
 }
 
 .language-bar {
@@ -358,6 +576,7 @@ h1 span {
 }
 
 .about-heading h2 {
+  overflow: hidden;
   margin: 0;
   font-family: var(--font-display);
   font-size: clamp(4.4rem, 6vw, 7.4rem);
@@ -366,7 +585,12 @@ h1 span {
   line-height: 0.9;
 }
 
-.about-heading span {
+.about-heading h2 > span {
+  display: block;
+  will-change: transform;
+}
+
+.about-heading > span {
   flex: 0 0 auto;
   font-size: clamp(3.2rem, 4vw, 5.1rem);
   line-height: 1;
@@ -405,12 +629,18 @@ h1 span {
 }
 
 .features-heading h2 {
+  overflow: hidden;
   margin: 0;
   font-family: var(--font-display);
   font-size: clamp(4rem, 5.6vw, 6.9rem);
   font-weight: 900;
   letter-spacing: -0.07em;
   line-height: 0.9;
+}
+
+.features-heading h2 > span {
+  display: block;
+  will-change: transform;
 }
 
 .features-heading > p {
@@ -966,6 +1196,37 @@ h1 span {
     --frame-radius: 1.35rem;
     --rule-width: 0.25rem;
     --navbar-height: 4.8rem;
+  }
+
+  .preloader-meta {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  .preloader-meta span:last-child {
+    opacity: 0.62;
+  }
+
+  .preloader-word > span {
+    max-width: 92vw;
+    font-size: clamp(3rem, 16vw, 5.2rem);
+    letter-spacing: -0.055em;
+    white-space: normal;
+  }
+
+  .preloader-word small {
+    margin-top: 0.9rem;
+    font-size: 0.58rem;
+  }
+
+  .preloader-orbit {
+    bottom: -31rem;
+    width: 42rem;
+  }
+
+  .preloader-progress {
+    grid-template-columns: 2rem minmax(0, 1fr) 2rem;
   }
 
   .site-shell {
