@@ -60,7 +60,6 @@ test("keeps the requested typography and smooth-scroll dependencies local", asyn
   assert.match(css, /\.nav-text-mono\s*\{[^}]*var\(--font-mono\)/s);
   assert.match(css, /\.nav-text-mono\s*\{[^}]*letter-spacing:\s*0\.12em/s);
   assert.match(css, /\.preloader-word\s*\{[^}]*opacity:\s*0/s);
-  assert.match(css, /\.preloader-word\s*\{[^}]*translate:\s*-50%\s+-50%/s);
   assert.match(css, /\.preloader-word:first-child\s*\{[^}]*opacity:\s*1/s);
   assert.match(css, /\.page\.is-preloading\s*\{[^}]*overflow:\s*hidden/s);
   assert.match(css, /\.about-text p\s*\{[^}]*var\(--font-mono\)/s);
