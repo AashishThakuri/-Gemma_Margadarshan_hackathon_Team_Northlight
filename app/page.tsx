@@ -599,7 +599,7 @@ export default function Home() {
             ))}
           </nav>
 
-          <a className="nav-cta nav-text-mono" href="#features">
+          <a className="nav-cta nav-text-mono" href="/try-verse">
             TRY VERSE
           </a>
 
@@ -622,7 +622,7 @@ export default function Home() {
               ))}
               <a
                 className="nav-text-mono"
-                href="#features"
+                href="/try-verse"
                 onClick={closeMobileMenu}
               >
                 TRY VERSE

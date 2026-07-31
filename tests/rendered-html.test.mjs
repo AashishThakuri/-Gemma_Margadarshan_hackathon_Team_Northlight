@@ -2,13 +2,13 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
-async function render() {
+async function render(pathname = "/") {
   const workerUrl = new URL("../dist/server/index.js", import.meta.url);
   workerUrl.searchParams.set("test", `${process.pid}-${Date.now()}`);
   const { default: worker } = await import(workerUrl.href);
 
   return worker.fetch(
-    new Request("http://localhost/", {
+    new Request(`http://localhost${pathname}`, {
       headers: { accept: "text/html" },
     }),
     {
@@ -43,9 +43,24 @@ test("server-renders the Verse landing page", async () => {
   assert.doesNotMatch(html, />TWO<\/i>|>LANGUAGES\.<\/i>|NEPALI \+ MAITHILI/);
   assert.match(
     html,
-    /class="nav-cta nav-text-mono" href="#features">TRY VERSE<\/a>/,
+    /class="nav-cta nav-text-mono" href="\/try-verse">TRY VERSE<\/a>/,
   );
   assert.doesNotMatch(html, /codex-preview|react-loading-skeleton/i);
+});
+
+test("server-renders the functional Verse caption studio", async () => {
+  const response = await render("/try-verse");
+  assert.equal(response.status, 200);
+
+  const html = await response.text();
+  assert.match(html, /THE CAPTION CUTTING ROOM/);
+  assert.match(html, /GIVE THE PICTURE/);
+  assert.match(html, /A VOICE YOU CAN SEE\./);
+  assert.match(html, /DROP THE MOVING PICTURE/);
+  assert.match(html, /PASTE A VIDEO LINK OR NAME THIS CUT/);
+  assert.match(html, /RECENT CUTS/);
+  assert.match(html, /type="file"/);
+  assert.match(html, /type="submit"/);
 });
 
 test("keeps the requested typography and smooth-scroll dependencies local", async () => {
