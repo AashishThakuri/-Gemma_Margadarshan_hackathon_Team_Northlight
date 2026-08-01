@@ -21,6 +21,16 @@ Verse is a multilingual captioning system built by **Team Northlight** for the *
 
 **VERSE V2** is based on **Gemma 4 E4B** and is trained for both same-language transcription and cross-language speech-to-text translation. The web application presents the caption workflow in a responsive interface designed for phones, tablets, laptops, and desktops.
 
+## How Verse uses Gemma
+
+Gemma 4 E4B is not a component of Verse, it is the whole model. Audio goes in and caption text comes out of the same network, so there is no Whisper, no cloud speech API, and no separate ASR stage anywhere in the path.
+
+The integration lives in [`backend/train_v2.py`](backend/train_v2.py). That file is the actual LoRA / PEFT fine-tune of `unsloth/gemma-4-e4b-it-unsloth-bnb-4bit`: it loads the base model with `FastModel.from_pretrained`, attaches the adapter, builds each training example as a conversation with an `audio` content block in the user turn, and trains with `SFTTrainer`. The base model id, the multitask conversation format, and the exact training arguments the V2 adapter was produced with are all there to read.
+
+One adapter covers nine behaviours rather than nine systems. Which behaviour you get is selected by the instruction in the prompt, not by a router, and that works only because Gemma 4 follows instructions and accepts audio in the same model. The alternative is an ASR stage followed by a separate translation stage whose errors compound on top of the first stage's.
+
+E4B was chosen deliberately. Captioning is sensitive to both latency and privacy, and the settings this is aimed at are classrooms, clinics and government service desks, where sending a hard-of-hearing user's appointment audio to a cloud API is the wrong default. The edge-deployable variant keeps on-device deployment reachable later instead of designing it out at the start.
+
 ## What Verse can do
 
 ### Same-language transcription
@@ -42,6 +52,12 @@ Verse is a multilingual captioning system built by **Team Northlight** for the *
 - Switch between English, Nepali, and Maithili caption tracks.
 - Preview synchronized captions in the browser.
 - Use a keyboard-accessible, responsive interface with reduced-motion support.
+
+## Who Verse is for
+
+Before writing model code we emailed the organisations who would have to live with the result. The National Federation of the Deaf Nepal and the National Federation of the Disabled Nepal both replied, and both told us the same thing: captions are a valuable accessibility tool for many hard-of-hearing people, but Nepali Sign Language interpretation is essential for Deaf people whose primary language is NSL, and captions are not a replacement for it.
+
+So Verse is not a Deaf accessibility product. It is captioning for hard-of-hearing people, for people who lost hearing later in life, and for deafblind users whose assistive technology reads text. Both replies are in [`docs/outreach.md`](docs/outreach.md).
 
 ## Model at a glance
 
@@ -156,7 +172,9 @@ The following preliminary check used 5 clips per source language, or 15 clips to
 | Maithili | 5 | 30.36% | 6.45% |
 | **Combined** | **15** | **12.35%** | **3.44%** |
 
-Lower WER and CER are better. This 15-clip check is a preliminary validation result, not a final benchmark or state-of-the-art claim. It is reported separately from the larger original-vs-fine-tuned comparison above.
+Lower WER and CER are better. This 15-clip check is a preliminary validation result, not a final benchmark or state-of-the-art claim. It is reported separately from the larger original-vs-fine-tuned comparison above, and the two should not be plotted against each other: there is no baseline decode on these same 15 clips, so the table describes V2 on its own. The console output is in [`docs/screenshots/quick-validation-run.png`](docs/screenshots/quick-validation-run.png).
+
+The next step for evaluation is decoding both models over one larger held-out set and reporting a single matched comparison.
 
 ## System flow
 
@@ -193,7 +211,11 @@ The caption request accepts a media file, `source_language`, and `target_languag
 
 ## Repository scope
 
-This repository contains the Verse web experience and hackathon caption demo. The full training corpus, model checkpoints, and private training workspace are not committed here. The V2 release should be described as a **LoRA/PEFT adapter** unless it is later merged with and distributed alongside compatible Gemma base weights.
+This repository contains the Verse web experience, the caption demo, and the V2 training code. The full training corpus, model checkpoints, and private training workspace are not committed here. The V2 release should be described as a **LoRA/PEFT adapter** unless it is later merged with and distributed alongside compatible Gemma base weights.
+
+`backend/` holds the training script and nothing else, because Verse has no self-hosted application backend. The Gemma inference endpoint ran on the rented GPUs described under [Training infrastructure](#training-infrastructure) and the frontend called that endpoint directly, so the request path is browser to GPU host with nothing of ours in between. The folder is there so a reader can see exactly how the model was produced rather than take our word for it.
+
+Training ran in our own Google Colab and RunPod accounts, which is why the checkpoints, the 200,442 example manifest, and the run logs live there instead of here. Anyone who wants to see them can ask, see [Contact](#contact).
 
 ## Live inference availability
 
@@ -240,7 +262,21 @@ frontend/
 `-- worker/                   # Cloudflare-compatible worker entry
 backend/
 `-- train_v2.py               # Clean VERSE V2 LoRA/PEFT training code
+docs/
+|-- kaggle-submission.md      # The writeup submitted to Kaggle
+|-- outreach.md               # NDFN and NFDN replies, and what changed because of them
+|-- pitch/                    # Presentation deck, .pptx and self-contained .html
+`-- screenshots/              # Evaluation run, product pages, correspondence, team
 ```
+
+## Documentation
+
+| Document | What is in it |
+| --- | --- |
+| [`docs/README.md`](docs/README.md) | Index, plus which evaluation number came from which run |
+| [`docs/kaggle-submission.md`](docs/kaggle-submission.md) | The writeup text submitted to Kaggle on 31 July 2026 |
+| [`docs/outreach.md`](docs/outreach.md) | The NDFN and NFDN replies that set the scope of the project |
+| [`docs/pitch/`](docs/pitch/) | Presentation deck. Open `verse-pitch.html` in a browser for a self-contained version |
 
 ## Limitations
 
@@ -260,6 +296,17 @@ Users must follow the terms of the Gemma base model, source dataset, IndicTrans2
 ## Team
 
 Built by **Team Northlight** for the **Gemma Margadarshan Hackathon**.
+
+![Team Northlight](docs/screenshots/team-2.png)
+
+## Contact
+
+The training runs, checkpoints, and evaluation outputs live in our own Google Colab and RunPod accounts rather than in this repository. If judges or anyone else want to see them, just ask. We are happy to share access to the Colab notebooks and the RunPod workspace, walk through the training logs and checkpoint directory, or answer any other question about how a number was produced.
+
+| Name | Phone | Email |
+| --- | --- | --- |
+| Praful Bhatt | 9808607050 | praful2062@gmail.com |
+| Aashish Thakuri | 9862557932 | |
 
 ---
 
