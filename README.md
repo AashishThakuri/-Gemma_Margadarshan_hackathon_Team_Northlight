@@ -16,10 +16,12 @@ Multilingual speech recognition, translation, and live captions for English, Nep
 
 ## Requirements to run
 
-- Linux with Python 3.10 or 3.11 and `ffmpeg`
-- NVIDIA CUDA GPU; at least 16 GB VRAM recommended
-- Node.js 22.13+ and npm
+- Backend: Linux, Windows, or Windows through WSL2 with Python 3.10/3.11 and `ffmpeg`
+- Backend: NVIDIA CUDA GPU with at least 16 GB VRAM recommended
+- Frontend: Windows, macOS, or Linux with Node.js 22.13+ and npm
 - Internet access for the first public base-model and adapter download
+
+macOS can run the frontend, but this repository's current 4-bit Unsloth backend requires NVIDIA CUDA. On a Mac, set `NEXT_PUBLIC_VERSE_API_URL` to a backend running on a Linux or Windows NVIDIA machine.
 
 Follow [Run locally](#run-locally) to start the caption API and website.
 
@@ -92,7 +94,7 @@ cd -- -Gemma_Margadarshan_hackathon_Team_Northlight
 
 ### 2. Start the backend
 
-Requires Linux, Python 3.10/3.11, `ffmpeg`, CUDA, and an NVIDIA GPU with at least 16 GB VRAM recommended.
+Requires Python 3.10/3.11, `ffmpeg`, CUDA-enabled PyTorch, and an NVIDIA GPU with at least 16 GB VRAM recommended. Linux, native Windows, and WSL2 are supported. Install the correct CUDA PyTorch build for your driver before installing the requirements.
 
 ```bash
 cd backend
@@ -101,6 +103,17 @@ source .venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env
 uvicorn app.main:app --host 0.0.0.0 --port 8000 --env-file .env
+```
+
+Windows PowerShell uses the same service:
+
+```powershell
+cd backend
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+Copy-Item .env.example .env
+python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --env-file .env
 ```
 
 ### 3. Start the frontend
