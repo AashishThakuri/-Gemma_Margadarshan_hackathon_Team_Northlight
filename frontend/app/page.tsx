@@ -150,7 +150,7 @@ export default function Home() {
     if (hasSeenPreloader) {
       document.body.classList.remove("is-loading");
       document.documentElement.dataset.preloaderSeen = "true";
-      setIsPreloading(false);
+      window.requestAnimationFrame(() => setIsPreloading(false));
       return;
     }
 

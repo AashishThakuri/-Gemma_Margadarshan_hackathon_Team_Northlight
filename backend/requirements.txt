@@ -1,0 +1,12 @@
+fastapi>=0.115,<1
+uvicorn[standard]>=0.34,<1
+python-dotenv>=1,<2
+python-multipart>=0.0.20,<1
+numpy>=1.26,<3
+librosa>=0.10.2,<1
+soundfile>=0.12,<1
+yt-dlp>=2025.6.30
+torch>=2.6
+transformers>=4.53
+peft>=0.15
+unsloth>=2025.7

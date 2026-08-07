@@ -669,6 +669,7 @@
   border: 0.08rem solid rgb(243 217 185 / 28%);
   align-items: center;
   justify-content: space-between;
+  gap: 1rem;
 }
 
 .options label {
@@ -839,7 +840,7 @@
   }
 
   .options select {
-    max-width: 13rem;
+    max-width: 9rem;
   }
 
   .languageSwitch {

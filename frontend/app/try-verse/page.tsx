@@ -8,319 +8,35 @@ import {
   type DragEvent,
   type FormEvent,
 } from "react";
+import Link from "next/link";
 import styles from "./studio.module.css";
 
 type InputMode = "link" | "upload";
-type CaptionLanguage = "english" | "nepali" | "maithili";
+type LanguageCode = "en" | "ne" | "mai";
+type CaptionStatus = "idle" | "processing" | "ready" | "error";
 type Preview =
   | { kind: "video"; src: string; title: string }
   | { kind: "audio"; src: string; title: string }
   | { kind: "embed"; src: string; title: string; youtubeId?: string }
   | { kind: "linked"; src: string; title: string };
 
-type CaptionCue = {
-  start: number;
-  end: number;
-  text: string;
+type CaptionResponse = {
+  success: boolean;
+  source_language: LanguageCode;
+  target_language: LanguageCode;
+  caption: string;
 };
 
-type YouTubePlayer = {
-  destroy: () => void;
-  getCurrentTime: () => number;
-};
-
-declare global {
-  interface Window {
-    YT?: {
-      Player: new (
-        element: HTMLIFrameElement,
-        options: { events: { onReady: () => void } },
-      ) => YouTubePlayer;
-    };
-    onYouTubeIframeAPIReady?: () => void;
-  }
-}
+const API_BASE_URL = (
+  process.env.NEXT_PUBLIC_VERSE_API_URL ?? "http://localhost:8000"
+).replace(/\/$/, "");
 
 const DEMO_VIDEO_ID = "nBpPe9UweWs";
-const AUDIO_DEMO_FILE = "videoplayback.mp3";
 const DEMO_PREVIEW: Preview = {
   kind: "embed",
-  src: `https://www.youtube-nocookie.com/embed/${DEMO_VIDEO_ID}?enablejsapi=1&rel=0&cc_load_policy=0`,
+  src: `https://www.youtube-nocookie.com/embed/${DEMO_VIDEO_ID}?rel=0&cc_load_policy=0`,
   title: "Weather and Small Talk — 30 second demo",
   youtubeId: DEMO_VIDEO_ID,
-};
-
-const DEMO_CAPTIONS: Record<CaptionLanguage, CaptionCue[]> = {
-  english: [
-    {
-      start: 4.97,
-      end: 8.969,
-      text: "Brrr. It’s so cold today. Yes, it’s a bit chilly.",
-    },
-    {
-      start: 8.969,
-      end: 12.75,
-      text: "It’s twenty-five degrees. What would that be in England?",
-    },
-    {
-      start: 12.75,
-      end: 17.75,
-      text: "Oh, minus something. But how did you know I was English?",
-    },
-    {
-      start: 17.75,
-      end: 20.97,
-      text: "Well, I could tell by your accent. Oh!",
-    },
-  ],
-  nepali: [
-    {
-      start: 4.97,
-      end: 8.969,
-      text: "ब्रर्र! आज त साह्रै जाडो छ। हो, अलि चिसो छ।",
-    },
-    {
-      start: 8.969,
-      end: 12.75,
-      text: "पच्चीस डिग्री छ। बेलायतमा यो कति हुन्थ्यो?",
-    },
-    {
-      start: 12.75,
-      end: 17.75,
-      text: "ओहो, शून्यभन्दा केही तल। तर म अङ्ग्रेज हुँ भनेर कसरी थाहा पाउनुभयो?",
-    },
-    {
-      start: 17.75,
-      end: 20.97,
-      text: "तपाईंको लवजबाट थाहा पाएँ। ओहो!",
-    },
-  ],
-  maithili: [
-    {
-      start: 4.97,
-      end: 8.969,
-      text: "बाप रे! आइ बहुत जाड़ अछि। हँ, कनिक ठंढ अछि।",
-    },
-    {
-      start: 8.969,
-      end: 12.75,
-      text: "पच्चीस डिग्री अछि। इंग्लैंडमे ई कतेक होइत?",
-    },
-    {
-      start: 12.75,
-      end: 17.75,
-      text: "ओह, शून्यसँ किछु कम। मुदा अहाँकेँ कोना बुझल जे हम अंग्रेज छी?",
-    },
-    {
-      start: 17.75,
-      end: 20.97,
-      text: "अहाँक लहजासँ बुझि गेलहुँ। ओह!",
-    },
-  ],
-};
-
-const AUDIO_DEMO_CAPTIONS: Record<CaptionLanguage, CaptionCue[]> = {
-  nepali: [
-    {
-      start: 24,
-      end: 44,
-      text: "क्षेत्रको जनजीवन हिजोदेखि केही सामान्य बन्दै गएको छ। राजनीतिक दल, जनप्रतिनिधि, नागरिक समाज र विभिन्न संघसंस्थाले शान्ति, सद्भाव र सामाजिक एकता कायम गर्ने प्रतिबद्धता जनाएका छन्।",
-    },
-    {
-      start: 44,
-      end: 60,
-      text: "मन्दिर, मस्जिद, चर्च र गुम्बालगायत सबै धार्मिक स्थलमा लाउडस्पीकर, माइक वा साउन्ड बक्स प्रयोग नगर्न मोरङ प्रशासनले निर्देशन जारी गरेको छ।",
-    },
-    {
-      start: 60,
-      end: 76,
-      text: "प्रशासन कार्यालय अगाडि ब्यारिकेड राखिएको छ। जनकपुरधामका चोकचोकमा प्रदर्शन हुँदा बजार आंशिक बन्द छ। सुनसरी घटनाबारे राष्ट्रिय सुरक्षा परिषद्को बैठक जारी छ।",
-    },
-    {
-      start: 76,
-      end: 96,
-      text: "शान्ति सुरक्षाको अवस्थाबारे छलफल गर्न प्रधानमन्त्री बालेन शाहको आह्वानमा सिंहदरबारमा बैठक बसेको छ।",
-    },
-    {
-      start: 100,
-      end: 120,
-      text: "घटनाको नैतिक जिम्मेवारी लिँदै प्रधानमन्त्री र गृहमन्त्रीले किन राजीनामा नदिने भन्दै एमाले सांसद पद्मा अर्यालले प्रश्न गरेकी छन्।",
-    },
-    {
-      start: 120,
-      end: 145,
-      text: "सम्पत्ति शुद्धीकरण अनुसन्धानसम्बन्धी विवादमा सुनुवाइ सकिएको छ र आदेश आउने तयारी छ।",
-    },
-    {
-      start: 164,
-      end: 184,
-      text: "रौतहट क्षेत्र नम्बर चारका प्रतिनिधिसभा सदस्य गणेश पौडेलमाथि कालो मसी छ्यापेर दुर्व्यवहार गरेको आरोपमा दुई जना पक्राउ परेका छन्।",
-    },
-    {
-      start: 184,
-      end: 208,
-      text: "लघुवित्त पीडितसँग वार्ता गर्न अर्थ मन्त्रालयका सहसचिव महेश आचार्यलाई वार्ता समितिको सदस्य सचिव तोकिएको छ।",
-    },
-    {
-      start: 216,
-      end: 240,
-      text: "राहदानी विभागले सेवाग्राहीको चाप सम्बोधन गर्न दैनिक उत्पादन क्षमता बढाउँदै आजदेखि दुई सिफ्टमा सेवा दिन थालेको छ।",
-    },
-    {
-      start: 240,
-      end: 264,
-      text: "विद्युतीय गाडी चलाउन चालकहरू अभ्यस्त नहुँदा दुर्घटना बढेको निष्कर्षपछि ट्राफिक प्रहरीले छुट्टै व्यवस्था गर्ने विषयमा छलफल थालेको छ।",
-    },
-    {
-      start: 300,
-      end: 312,
-      text: "पाकिस्तानमा प्रहरी चौकीमा भएको आक्रमणमा नौ प्रहरीसहित चौबीस जनाको मृत्यु भएको छ।",
-    },
-    {
-      start: 312,
-      end: 326,
-      text: "रुसी आक्रमणमा दुई बालबालिकाको मृत्यु भएको छ। म्यानमारले मलेसियाबाट पाँच हजार रोहिंग्यालाई फिर्ता लैजाने भएको छ।",
-    },
-    {
-      start: 326,
-      end: 336,
-      text: "देशविदेशका ताजा समाचारका लागि नेपाल टाइम्सको अनलाइन, फेसबुक तथा युट्युब च्यानल हेर्नुहोस्। धन्यवाद।",
-    },
-  ],
-  english: [
-    {
-      start: 24,
-      end: 44,
-      text: "Daily life in the area has gradually returned to normal since yesterday. Political parties, elected representatives, civil society and organizations have pledged to preserve peace, harmony and social unity.",
-    },
-    {
-      start: 44,
-      end: 60,
-      text: "The Morang administration has directed temples, mosques, churches, monasteries and other religious sites not to use loudspeakers, microphones or sound boxes.",
-    },
-    {
-      start: 60,
-      end: 76,
-      text: "Barricades have been placed outside the administration office. Protests have partly closed Janakpurdham’s markets, while the National Security Council discusses the Sunsari incident.",
-    },
-    {
-      start: 76,
-      end: 96,
-      text: "Prime Minister Balen Shah has called a meeting at Singha Durbar to discuss the country’s security situation.",
-    },
-    {
-      start: 100,
-      end: 120,
-      text: "UML lawmaker Padma Aryal has asked why the prime minister and home minister should not resign and accept moral responsibility for the incident.",
-    },
-    {
-      start: 120,
-      end: 145,
-      text: "The hearing in the dispute concerning the money-laundering investigation has concluded, and an order is expected.",
-    },
-    {
-      start: 164,
-      end: 184,
-      text: "Two people have been arrested for allegedly throwing black ink on and mistreating Rautahat constituency four lawmaker Ganesh Paudel.",
-    },
-    {
-      start: 184,
-      end: 208,
-      text: "Finance Ministry joint secretary Mahesh Acharya has been appointed member-secretary of the committee negotiating with microfinance victims.",
-    },
-    {
-      start: 216,
-      end: 240,
-      text: "The Passport Department has increased daily production and begun operating two shifts to address the volume of applicants.",
-    },
-    {
-      start: 240,
-      end: 264,
-      text: "Traffic police have begun discussing separate measures for electric vehicles after concluding that unfamiliarity among drivers is increasing crashes.",
-    },
-    {
-      start: 300,
-      end: 312,
-      text: "An attack on a police post in Pakistan has killed twenty-four people, including nine police officers.",
-    },
-    {
-      start: 312,
-      end: 326,
-      text: "Two children have died in a Russian attack. Myanmar will take back five thousand Rohingya people from Malaysia.",
-    },
-    {
-      start: 326,
-      end: 336,
-      text: "For the latest national and international news, follow Nepal Times online, on Facebook and on YouTube. Thank you.",
-    },
-  ],
-  maithili: [
-    {
-      start: 24,
-      end: 44,
-      text: "क्षेत्रक जनजीवन काल्हिसँ किछु सामान्य भ’ रहल अछि। राजनीतिक दल, जनप्रतिनिधि, नागरिक समाज आ विभिन्न संघ-संस्था शान्ति, सद्भाव आ सामाजिक एकता कायम रखबाक प्रतिबद्धता जनौलनि।",
-    },
-    {
-      start: 44,
-      end: 60,
-      text: "मन्दिर, मस्जिद, चर्च, गुम्बा आ आन धार्मिक स्थलमे लाउडस्पीकर, माइक वा साउन्ड बक्स प्रयोग नहि करबाक मोरङ प्रशासन निर्देशन देलक अछि।",
-    },
-    {
-      start: 60,
-      end: 76,
-      text: "प्रशासन कार्यालयक आगाँ बेरिकेड राखल गेल अछि। जनकपुरधामक चोक-चोकमे प्रदर्शनसँ बजार आंशिक बन्द अछि, आ सुनसरी घटनापर राष्ट्रिय सुरक्षा परिषदक बैठक जारी अछि।",
-    },
-    {
-      start: 76,
-      end: 96,
-      text: "शान्ति-सुरक्षाक अवस्थापर चर्चा करबाक लेल प्रधानमन्त्री बालेन शाहक आह्वानमे सिंहदरबारमे बैठक बैसल अछि।",
-    },
-    {
-      start: 100,
-      end: 120,
-      text: "एमाले सांसद पद्मा अर्याल प्रश्न उठौलनि जे घटनाक नैतिक जिम्मेवारी लैत प्रधानमन्त्री आ गृहमन्त्री राजीनामा किएक नहि देथि।",
-    },
-    {
-      start: 120,
-      end: 145,
-      text: "सम्पत्ति शुद्धीकरण अनुसन्धानसम्बन्धी विवादक सुनुवाइ पूरा भ’ गेल अछि आ आदेश आबयबाक तैयारी अछि।",
-    },
-    {
-      start: 164,
-      end: 184,
-      text: "रौतहट क्षेत्र नम्बर चारक प्रतिनिधिसभा सदस्य गणेश पौडेलपर कालो मसी फेँकबाक आ दुर्व्यवहार करबाक आरोपमे दू गोटे गिरफ्तार भेल अछि।",
-    },
-    {
-      start: 184,
-      end: 208,
-      text: "लघुवित्त पीड़ितसँ वार्ता करबाक लेल अर्थ मन्त्रालयक सहसचिव महेश आचार्यकेँ वार्ता समितिक सदस्य-सचिव बनाओल गेल अछि।",
-    },
-    {
-      start: 216,
-      end: 240,
-      text: "राहदानी विभाग सेवाग्राहीक चाप कम करबाक लेल दैनिक उत्पादन क्षमता बढ़ा कऽ आइ सँ दू पालीमे सेवा शुरू केलक अछि।",
-    },
-    {
-      start: 240,
-      end: 264,
-      text: "चालकसभ विद्युतीय गाड़ी चलाबयमे अभ्यस्त नहि रहलासँ दुर्घटना बढ़ल निष्कर्षक बाद ट्राफिक पुलिस अलग व्यवस्था पर चर्चा शुरू केलक अछि।",
-    },
-    {
-      start: 300,
-      end: 312,
-      text: "पाकिस्तानमे पुलिस चौकीपर हमला सँ नौ पुलिसकर्मीसहित चौबीस गोटेक मृत्यु भेल अछि।",
-    },
-    {
-      start: 312,
-      end: 326,
-      text: "रूसी हमलामे दू बालकक मृत्यु भेल अछि। म्यानमार मलेसियासँ पाँच हजार रोहिंग्याकेँ वापस लेत।",
-    },
-    {
-      start: 326,
-      end: 336,
-      text: "देश-विदेशक ताजा समाचारक लेल नेपाल टाइम्सक अनलाइन, फेसबुक आ युट्युब च्यानल देखू। धन्यवाद।",
-    },
-  ],
 };
 
 const INPUT_MODES = [
@@ -334,28 +50,14 @@ const CAPTION_STYLES = [
   "Minimal for films",
 ] as const;
 
-const CAPTION_LANGUAGES: CaptionLanguage[] = [
-  "english",
-  "nepali",
-  "maithili",
+const LANGUAGES: ReadonlyArray<{ code: LanguageCode; label: string }> = [
+  { code: "en", label: "English" },
+  { code: "ne", label: "Nepali" },
+  { code: "mai", label: "Maithili" },
 ];
 
-function getCaptionTrack(
-  preview: Preview | null,
-  language: CaptionLanguage,
-): CaptionCue[] {
-  if (preview?.kind === "embed" && preview.youtubeId === DEMO_VIDEO_ID) {
-    return DEMO_CAPTIONS[language];
-  }
-
-  if (
-    preview?.kind === "audio" &&
-    preview.title.toLowerCase() === AUDIO_DEMO_FILE
-  ) {
-    return AUDIO_DEMO_CAPTIONS[language];
-  }
-
-  return [];
+function languageLabel(code: LanguageCode): string {
+  return LANGUAGES.find((language) => language.code === code)?.label ?? code;
 }
 
 function buildPreview(value: string): Preview | null {
@@ -372,7 +74,7 @@ function buildPreview(value: string): Preview | null {
     if (youtubeId) {
       return {
         kind: "embed",
-        src: `https://www.youtube-nocookie.com/embed/${youtubeId}?enablejsapi=1&rel=0&cc_load_policy=0`,
+        src: `https://www.youtube-nocookie.com/embed/${youtubeId}?rel=0&cc_load_policy=0`,
         title: "YouTube video",
         youtubeId,
       };
@@ -411,32 +113,21 @@ function ArrowIcon() {
 
 export default function TryVerse() {
   const fileInput = useRef<HTMLInputElement>(null);
-  const audioPlayer = useRef<HTMLAudioElement>(null);
-  const youtubeFrame = useRef<HTMLIFrameElement>(null);
-  const youtubePlayer = useRef<YouTubePlayer | null>(null);
-  const captionClock = useRef<number | null>(null);
-  const playbackTime = useRef(0);
-  const captionLanguageRef = useRef<CaptionLanguage>("nepali");
   const [mode, setMode] = useState<InputMode>("link");
   const [videoLink, setVideoLink] = useState("");
   const [preview, setPreview] = useState<Preview | null>(DEMO_PREVIEW);
+  const [mediaFile, setMediaFileState] = useState<File | null>(null);
+  const [submittedUrl, setSubmittedUrl] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [dragging, setDragging] = useState(false);
-  const [isSending, setIsSending] = useState(false);
-  const [captionLanguage, setCaptionLanguage] =
-    useState<CaptionLanguage>("nepali");
+  const [captionStatus, setCaptionStatus] = useState<CaptionStatus>("idle");
+  const [sourceLanguage, setSourceLanguage] = useState<LanguageCode>("en");
+  const [targetLanguage, setTargetLanguage] = useState<LanguageCode>("ne");
   const [currentCaption, setCurrentCaption] = useState("");
   const [captionStyle, setCaptionStyle] =
     useState<(typeof CAPTION_STYLES)[number]>(CAPTION_STYLES[0]);
 
-  useEffect(() => {
-    captionLanguageRef.current = captionLanguage;
-    const cue = getCaptionTrack(preview, captionLanguage).find(
-      ({ start, end }) =>
-        playbackTime.current >= start && playbackTime.current < end,
-    );
-    setCurrentCaption(cue?.text ?? "");
-  }, [captionLanguage, preview]);
+  const isSending = captionStatus === "processing";
 
   useEffect(() => {
     return () => {
@@ -450,88 +141,77 @@ export default function TryVerse() {
   }, [preview]);
 
   useEffect(() => {
-    if (
-      preview?.kind !== "embed" ||
-      !preview.youtubeId ||
-      !youtubeFrame.current
-    ) {
+    if (!mediaFile && !submittedUrl) return;
+
+    const controller = new AbortController();
+    async function requestCaption() {
+      setCaptionStatus("processing");
       setCurrentCaption("");
-      return;
-    }
+      setError("");
 
-    let cancelled = false;
+      const formData = new FormData();
+      if (mediaFile) {
+        formData.append("file", mediaFile);
+      } else if (submittedUrl) {
+        formData.append("video_url", submittedUrl);
+      }
+      formData.append("source_language", sourceLanguage);
+      formData.append("target_language", targetLanguage);
 
-    const syncCaption = () => {
       try {
-        playbackTime.current = youtubePlayer.current?.getCurrentTime() ?? 0;
-        if (preview.youtubeId !== DEMO_VIDEO_ID) return;
+        const response = await fetch(`${API_BASE_URL}/api/caption`, {
+          method: "POST",
+          body: formData,
+          signal: controller.signal,
+        });
+        const body = (await response.json().catch(() => ({}))) as
+          | CaptionResponse
+          | { detail?: string };
 
-        const cue = DEMO_CAPTIONS[captionLanguageRef.current].find(
-          ({ start, end }) =>
-            playbackTime.current >= start && playbackTime.current < end,
-        );
-        setCurrentCaption((current) =>
-          current === (cue?.text ?? "") ? current : (cue?.text ?? ""),
-        );
-      } catch {
-        // The player may not be ready during its first few frames.
-      }
-    };
+        if (!response.ok || !("caption" in body)) {
+          throw new Error(
+            "detail" in body && body.detail
+              ? body.detail
+              : "The caption server could not process this media.",
+          );
+        }
 
-    const connectPlayer = () => {
-      if (cancelled || !window.YT?.Player || !youtubeFrame.current) return;
-      youtubePlayer.current?.destroy();
-      youtubePlayer.current = new window.YT.Player(youtubeFrame.current, {
-        events: {
-          onReady: () => {
-            syncCaption();
-            captionClock.current = window.setInterval(syncCaption, 100);
-          },
-        },
-      });
-    };
-
-    if (window.YT?.Player) {
-      connectPlayer();
-    } else {
-      const previousReady = window.onYouTubeIframeAPIReady;
-      window.onYouTubeIframeAPIReady = () => {
-        previousReady?.();
-        connectPlayer();
-      };
-
-      if (!document.querySelector('script[src="https://www.youtube.com/iframe_api"]')) {
-        const script = document.createElement("script");
-        script.src = "https://www.youtube.com/iframe_api";
-        document.head.appendChild(script);
+        setCurrentCaption(body.caption);
+        setCaptionStatus("ready");
+      } catch (requestError) {
+        if (controller.signal.aborted) return;
+        const message =
+          requestError instanceof Error
+            ? requestError.message
+            : "The caption server could not be reached.";
+        setError(message);
+        setCaptionStatus("error");
       }
     }
 
-    return () => {
-      cancelled = true;
-      if (captionClock.current !== null) {
-        window.clearInterval(captionClock.current);
-        captionClock.current = null;
-      }
-      youtubePlayer.current?.destroy();
-      youtubePlayer.current = null;
-    };
-  }, [preview]);
+    void requestCaption();
+    return () => controller.abort();
+  }, [mediaFile, sourceLanguage, submittedUrl, targetLanguage]);
+
+  function chooseMode(nextMode: InputMode) {
+    setMode(nextMode);
+    setPreview(null);
+    setMediaFileState(null);
+    setSubmittedUrl(null);
+    setCaptionStatus("idle");
+    setCurrentCaption("");
+    setError("");
+  }
 
   function setMediaFile(file?: File) {
-    const isVideo = file?.type.startsWith("video/");
-    const isAudio = file?.type.startsWith("audio/");
+    const extension = file?.name.split(".").pop()?.toLowerCase();
+    const supported = ["wav", "mp3", "m4a", "webm", "mp4", "mov"];
+    const isVideo = Boolean(file?.type.startsWith("video/"));
+    const isAudio = Boolean(file?.type.startsWith("audio/"));
 
-    if (!file || (!isVideo && !isAudio)) {
-      setError("Choose an audio or video file to continue.");
+    if (!file || ((!isVideo && !isAudio) || !supported.includes(extension ?? ""))) {
+      setError("Choose a WAV, MP3, M4A, WEBM, MP4, or MOV file.");
       return;
-    }
-
-    if (
-      (preview?.kind === "video" || preview?.kind === "audio") &&
-      preview.src.startsWith("blob:")
-    ) {
-      URL.revokeObjectURL(preview.src);
     }
 
     setPreview({
@@ -539,11 +219,10 @@ export default function TryVerse() {
       src: URL.createObjectURL(file),
       title: file.name,
     });
-    playbackTime.current = 0;
+    setMediaFileState(file);
+    setSubmittedUrl(null);
     setCurrentCaption("");
     setError("");
-    setIsSending(true);
-    window.setTimeout(() => setIsSending(false), 900);
   }
 
   function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
@@ -558,7 +237,8 @@ export default function TryVerse() {
 
   function submitLink(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const nextPreview = buildPreview(videoLink.trim());
+    const value = videoLink.trim();
+    const nextPreview = buildPreview(value);
 
     if (!nextPreview) {
       setError("Paste a complete video URL, including https://");
@@ -566,47 +246,41 @@ export default function TryVerse() {
     }
 
     setPreview(nextPreview);
+    setMediaFileState(null);
+    setSubmittedUrl(value);
+    setCurrentCaption("");
     setError("");
-    setIsSending(true);
-    window.setTimeout(() => setIsSending(false), 900);
   }
 
   function resetPreview() {
     setPreview(null);
-    playbackTime.current = 0;
+    setMediaFileState(null);
+    setSubmittedUrl(null);
+    setCaptionStatus("idle");
     setCurrentCaption("");
     setVideoLink("");
     setError("");
   }
 
-  function syncUploadedAudioCaption() {
-    playbackTime.current = audioPlayer.current?.currentTime ?? 0;
-    const cue = getCaptionTrack(preview, captionLanguageRef.current).find(
-      ({ start, end }) =>
-        playbackTime.current >= start && playbackTime.current < end,
-    );
-    setCurrentCaption((current) =>
-      current === (cue?.text ?? "") ? current : (cue?.text ?? ""),
-    );
-  }
-
-  const hasTimedCaptions = getCaptionTrack(
-    preview,
-    captionLanguage,
-  ).length > 0;
+  const captionCopy =
+    captionStatus === "processing"
+      ? "VERSE V2 IS LISTENING — LONG MEDIA IS PROCESSED IN 25-SECOND PARTS"
+      : captionStatus === "error"
+        ? "CAPTION GENERATION COULD NOT COMPLETE"
+        : currentCaption || "SUBMIT MEDIA — THE GENERATED CAPTION WILL APPEAR HERE";
 
   return (
     <main className={styles.page}>
       <section className={styles.shell}>
         <header className={styles.header}>
-          <a className={styles.brand} href="/" aria-label="Return to Verse home">
+          <Link className={styles.brand} href="/" aria-label="Return to Verse home">
             VERSE<span>.</span>
-          </a>
+          </Link>
           <p>VIDEO IN / WORDS OUT</p>
-          <a className={styles.close} href="/" aria-label="Close Try Verse">
+          <Link className={styles.close} href="/" aria-label="Close Try Verse">
             <span />
             <span />
-          </a>
+          </Link>
         </header>
 
         <div className={styles.workspace}>
@@ -633,11 +307,7 @@ export default function TryVerse() {
                   aria-pressed={mode === item.id}
                   className={mode === item.id ? styles.activeMode : ""}
                   key={item.id}
-                  onClick={() => {
-                    setMode(item.id);
-                    setPreview(null);
-                    setError("");
-                  }}
+                  onClick={() => chooseMode(item.id)}
                   type="button"
                 >
                   <span>{item.number}</span>
@@ -647,16 +317,14 @@ export default function TryVerse() {
             </div>
 
             <div
-              className={`${styles.stage} ${
-                isSending ? styles.isSending : ""
-              }`}
+              className={`${styles.stage} ${isSending ? styles.isSending : ""}`}
             >
               <div className={styles.gradient} aria-hidden="true" />
 
               {preview ? (
                 <div className={styles.preview}>
                   <header>
-                    <span>VIDEO READY</span>
+                    <span>{isSending ? "MODEL WORKING" : "VIDEO READY"}</span>
                     <strong>{preview.title}</strong>
                     <button onClick={resetPreview} type="button">
                       CHANGE
@@ -673,13 +341,7 @@ export default function TryVerse() {
                         <span>AUDIO</span>
                         <strong>WORDS IN MOTION.</strong>
                       </div>
-                      <audio
-                        controls
-                        onSeeked={syncUploadedAudioCaption}
-                        onTimeUpdate={syncUploadedAudioCaption}
-                        ref={audioPlayer}
-                        src={preview.src}
-                      >
+                      <audio controls src={preview.src}>
                         Your browser does not support audio playback.
                       </audio>
                     </div>
@@ -688,7 +350,6 @@ export default function TryVerse() {
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                       allowFullScreen
                       key={preview.src}
-                      ref={preview.youtubeId ? youtubeFrame : undefined}
                       src={preview.src}
                       title={preview.title}
                     />
@@ -696,57 +357,46 @@ export default function TryVerse() {
                     <div className={styles.linked}>
                       <span>LINK RECEIVED</span>
                       <strong>{preview.title}</strong>
-                      <p>
-                        The source is ready. Continue when the caption engine is
-                        connected.
-                      </p>
+                      <p>Verse sends this source to the model-backed caption service.</p>
                       <a href={preview.src} rel="noreferrer" target="_blank">
                         OPEN SOURCE <ArrowIcon />
                       </a>
                     </div>
                   )}
 
-                  {hasTimedCaptions ? (
-                    <>
-                      <div
-                        className={styles.languageSwitch}
-                        aria-label="Caption language"
+                  <div
+                    className={styles.languageSwitch}
+                    aria-label="Caption output language"
+                  >
+                    {LANGUAGES.map((language) => (
+                      <button
+                        aria-pressed={targetLanguage === language.code}
+                        className={
+                          targetLanguage === language.code
+                            ? styles.activeLanguage
+                            : ""
+                        }
+                        key={language.code}
+                        onClick={() => setTargetLanguage(language.code)}
+                        type="button"
                       >
-                        {CAPTION_LANGUAGES.map((language) => (
-                          <button
-                            aria-pressed={captionLanguage === language}
-                            className={
-                              captionLanguage === language
-                                ? styles.activeLanguage
-                                : ""
-                            }
-                            key={language}
-                            onClick={() => setCaptionLanguage(language)}
-                            type="button"
-                          >
-                            {language.toUpperCase()}
-                          </button>
-                        ))}
-                      </div>
-                      <div
-                        aria-live="polite"
-                        className={`${styles.captionDemo} ${
-                          currentCaption ? styles.captionActive : ""
-                        }`}
-                      >
-                        <span>LIVE / {captionLanguage.toUpperCase()}</span>
-                        <p>
-                          {currentCaption ||
-                            "PRESS PLAY — CAPTIONS BEGIN WITH THE FIRST WORD"}
-                        </p>
-                      </div>
-                    </>
-                  ) : (
-                    <div className={styles.captionDemo}>
-                      <span>VIDEO READY</span>
-                      <p>Caption processing is ready for this source.</p>
-                    </div>
-                  )}
+                        {language.label.toUpperCase()}
+                      </button>
+                    ))}
+                  </div>
+                  <div
+                    aria-live="polite"
+                    aria-busy={isSending}
+                    className={`${styles.captionDemo} ${
+                      currentCaption ? styles.captionActive : ""
+                    }`}
+                  >
+                    <span>
+                      VERSE V2 / {languageLabel(sourceLanguage).toUpperCase()} →{" "}
+                      {languageLabel(targetLanguage).toUpperCase()}
+                    </span>
+                    <p>{captionCopy}</p>
+                  </div>
                 </div>
               ) : mode === "link" ? (
                 <form className={styles.linkForm} onSubmit={submitLink}>
@@ -799,12 +449,28 @@ export default function TryVerse() {
                   </span>
                   <strong>DROP AUDIO OR VIDEO</strong>
                   <p>OR CLICK TO BROWSE</p>
-                  <small>MP3 · WAV · MP4 · MOV · WEBM</small>
+                  <small>MP3 · WAV · M4A · MP4 · MOV · WEBM</small>
                 </button>
               )}
             </div>
 
             <div className={styles.options}>
+              <label htmlFor="source-language">
+                <span>SPOKEN LANGUAGE</span>
+                <select
+                  id="source-language"
+                  onChange={(event) =>
+                    setSourceLanguage(event.target.value as LanguageCode)
+                  }
+                  value={sourceLanguage}
+                >
+                  {LANGUAGES.map((language) => (
+                    <option key={language.code} value={language.code}>
+                      {language.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
               <label htmlFor="caption-style">
                 <span>CAPTION STYLE</span>
                 <select
@@ -822,15 +488,15 @@ export default function TryVerse() {
                 </select>
               </label>
               <p>
-                <span>SESSION</span>
-                LOCAL / PRIVATE
+                <span>MODEL</span>
+                GEMMA + VERSE V2
               </p>
             </div>
 
             {error ? <p className={styles.error}>{error}</p> : null}
 
             <input
-              accept="audio/*,video/*"
+              accept=".wav,.mp3,.m4a,.webm,.mp4,.mov,audio/*,video/*"
               className={styles.fileInput}
               onChange={handleFileChange}
               ref={fileInput}

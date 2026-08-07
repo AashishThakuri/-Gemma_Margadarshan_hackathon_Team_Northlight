@@ -1,5 +1,9 @@
 # Dependencies and build output
 **/node_modules/
+**/.venv/
+**/__pycache__/
+**/.pytest_cache/
+**/*.py[cod]
 **/.next/
 **/.vinext/
 **/dist/
@@ -13,6 +17,8 @@
 # Local environment and tooling
 .env*
 **/.env*
+!backend/.env.example
+!frontend/.env.example
 .DS_Store
 *.pem
 AGENTS.md

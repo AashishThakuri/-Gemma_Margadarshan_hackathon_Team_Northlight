@@ -16,7 +16,7 @@ Multilingual speech recognition, translation, and live captions for English, Nep
 ![Verse landing page](frontend/public/verse-landing.png)
 
 > [!IMPORTANT]
-> **Live Gemma inference is temporarily unavailable.** Our RunPod GPU credit balance was exhausted after fine-tuning and evaluation, so we cannot keep the VERSE V2 endpoint publicly online right now. We sincerely apologize. The **Try Verse** demo uses prepared, synchronized English, Nepali, and Maithili caption tracks to show exactly how output from our fine-tuned Gemma model appears in the live-caption interface; it is not presented as fresh browser inference. We will restore the model-backed `/caption` endpoint as soon as GPU access is available again.
+> **The public GPU endpoint is temporarily offline because our RunPod credit balance was exhausted during fine-tuning and evaluation. We sincerely apologize.** The complete model-backed API is now included in `backend/`, and **Try Verse no longer uses prepared or hardcoded caption tracks**: it calls that API for fresh VERSE V2 inference. Reviewers can run the backend on their own NVIDIA GPU and point the frontend to it with `NEXT_PUBLIC_VERSE_API_URL`. We will restore the hosted GPU endpoint as soon as GPU access is available again.
 
 ## Overview
 
@@ -28,7 +28,7 @@ Verse is a multilingual captioning system built by **Team Northlight** for the *
 
 Gemma 4 E4B is not a component of Verse, it is the whole model. Audio goes in and caption text comes out of the same network, so there is no Whisper, no cloud speech API, and no separate ASR stage anywhere in the path.
 
-The integration lives in [`backend/train_v2.py`](backend/train_v2.py). That file is the actual LoRA / PEFT fine-tune of `unsloth/gemma-4-e4b-it-unsloth-bnb-4bit`: it loads the base model with `FastModel.from_pretrained`, attaches the adapter, builds each training example as a conversation with an `audio` content block in the user turn, and trains with `SFTTrainer`. The base model id, the multitask conversation format, and the exact training arguments the V2 adapter was produced with are all there to read.
+Training lives in [`backend/train_v2.py`](backend/train_v2.py), while production inference lives in [`backend/app/`](backend/app/). The training code loads `unsloth/gemma-4-e4b-it-unsloth-bnb-4bit`, attaches the LoRA/PEFT adapter, builds each example as a conversation with an `audio` content block, and trains with `SFTTrainer`. The runtime follows the same architecture: Gemma 4 E4B base weights plus the public [VERSE V2 adapter on Hugging Face](https://huggingface.co/Aashishhhhhhhh/verse-v2-nepali-maithili).
 
 One adapter covers nine behaviours rather than nine systems. Which behaviour you get is selected by the instruction in the prompt, not by a router, and that works only because Gemma 4 follows instructions and accepts audio in the same model. The alternative is an ASR stage followed by a separate translation stage whose errors compound on top of the first stage's.
 
@@ -67,6 +67,7 @@ So Verse is not a Deaf accessibility product. It is captioning for hard-of-heari
 | Item | VERSE V2 configuration |
 | --- | --- |
 | Base model | `unsloth/gemma-4-e4b-it-unsloth-bnb-4bit` |
+| Public adapter | [`Aashishhhhhhhh/verse-v2-nepali-maithili`](https://huggingface.co/Aashishhhhhhhh/verse-v2-nepali-maithili) |
 | Architecture | Gemma 4 E4B instruction-tuned |
 | Fine-tuning method | LoRA / PEFT |
 | Trainable parameters | 18,350,080 |
@@ -194,14 +195,14 @@ Video URL / audio file / video file
  English / Nepali / Maithili playback
 ```
 
-During development, the caption service exposed:
+The included caption service exposes:
 
 ```text
-GET  /health
-POST /caption
+GET  /api/health
+POST /api/caption
 ```
 
-The caption request accepts a media file, `source_language`, and `target_language`. Language codes are `en`, `ne`, and `mai`.
+The caption request accepts a media file (or a public `video_url`), `source_language`, and `target_language`. Language codes are `en`, `ne`, and `mai`. Uploaded audio/video is converted to mono 16 kHz float32 audio, split into overlapping 25-second chunks, decoded sequentially, and joined with boundary deduplication.
 
 ## Technology
 
@@ -214,43 +215,87 @@ The caption request accepts a media file, `source_language`, and `target_languag
 
 ## Repository scope
 
-This repository contains the Verse web experience, the caption demo, and the V2 training code. The full training corpus, model checkpoints, and private training workspace are not committed here. The V2 release should be described as a **LoRA/PEFT adapter** unless it is later merged with and distributed alongside compatible Gemma base weights.
+This repository contains the Verse web experience, the VERSE V2 caption API, and the V2 training code. The full training corpus, model checkpoints, and private training workspace are not committed here. The public release is a **LoRA/PEFT adapter** and must be loaded on top of the compatible Gemma base weights.
 
-`backend/` holds the training script and nothing else, because Verse has no self-hosted application backend. The Gemma inference endpoint ran on the rented GPUs described under [Training infrastructure](#training-infrastructure) and the frontend called that endpoint directly, so the request path is browser to GPU host with nothing of ours in between. The folder is there so a reader can see exactly how the model was produced rather than take our word for it.
+`backend/` contains both the reproducible training script and the self-hosted FastAPI inference service. The service loads the Gemma base and public adapter once at startup, processes uploads and public video URLs, and exposes health and caption endpoints. `frontend/` keeps the existing Verse interface and sends the selected source language, target language, and media to that service.
 
 Training ran in our own Google Colab and RunPod accounts, which is why the checkpoints, the 200,442 example manifest, and the run logs live there instead of here. Anyone who wants to see them can ask, see [Contact](#contact).
 
 ## Live inference availability
 
-The VERSE V2 adapter was fine-tuned and evaluated in the RunPod training environment. At the time of this hackathon submission, our RunPod credit balance has been exhausted, so we cannot keep the GPU-backed Gemma inference endpoint publicly available. We sincerely apologize for this temporary limitation.
+The VERSE V2 adapter was fine-tuned and evaluated on RunPod. Our RunPod credit balance was exhausted during that work, so the team cannot currently keep a public GPU endpoint online. We sincerely apologize for this temporary limitation.
 
-To keep the product experience reviewable, the **Try Verse** page includes synchronized English, Nepali, and Maithili caption tracks that demonstrate how output from our fine-tuned Gemma workflow is displayed during live caption playback. These prepared tracks demonstrate the caption timing, language switching, and user experience; the public demo is not currently running new model inference in the browser.
+The repository does not hide that limitation or substitute hardcoded output. The **Try Verse** page now calls the included `/api/caption` service and displays the fresh result in its existing caption area. Without a configured GPU backend it reports the service as unavailable. Reviewers with a Linux NVIDIA environment can run the complete inference path locally using the instructions below and the public [VERSE V2 Hugging Face adapter](https://huggingface.co/Aashishhhhhhhh/verse-v2-nepali-maithili).
 
-As soon as GPU access is restored, the `/caption` API can reconnect the VERSE V2 adapter and provide live model-generated captions again. The cleaned V2 fine-tuning implementation is included at `backend/train_v2.py`.
+As soon as GPU credits are restored, we will deploy this same backend and set the production `NEXT_PUBLIC_VERSE_API_URL`; no frontend redesign or caption-table swap is required.
 
 ## Run locally
 
-### Requirements
+### Frontend requirements
 
 - Node.js 22.13 or newer
 - npm
 
-### Setup
+### Clone and start the frontend
 
 ```bash
 git clone https://github.com/AashishThakuri/-Gemma_Margadarshan_hackathon_Team_Northlight.git
 cd -- -Gemma_Margadarshan_hackathon_Team_Northlight
 cd frontend
 npm install
+cp .env.example .env.local
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000). The caption workspace is available at [http://localhost:3000/try-verse](http://localhost:3000/try-verse).
+On Windows PowerShell, use `Copy-Item .env.example .env.local` instead of `cp`. Open [http://localhost:3000](http://localhost:3000); the caption workspace is at [http://localhost:3000/try-verse](http://localhost:3000/try-verse).
+
+### Start the VERSE V2 backend
+
+The model runtime requires Linux, `ffmpeg`, an NVIDIA CUDA GPU, Python 3.10 or 3.11, and enough VRAM for the 4-bit Gemma E4B base plus the adapter. At least 16 GB VRAM is recommended; the A100 and B200 environments used during development provide more headroom.
+
+```bash
+cd backend
+python -m venv .venv
+source .venv/bin/activate
+pip install --upgrade pip
+pip install -r requirements.txt
+cp .env.example .env
+uvicorn app.main:app --host 0.0.0.0 --port 8000 --env-file .env
+```
+
+The frontend example already points to `http://localhost:8000`. Confirm startup with:
+
+```bash
+curl http://localhost:8000/api/health
+```
+
+Generate a Nepali-to-English caption with:
+
+```bash
+curl -X POST http://localhost:8000/api/caption \
+  -F "file=@sample.mp3" \
+  -F "source_language=ne" \
+  -F "target_language=en"
+```
+
+Same source and target codes perform transcription; different codes perform speech translation. All nine combinations of `en`, `ne`, and `mai` are supported.
+
+### Environment variables
+
+| Variable | Default |
+| --- | --- |
+| `VERSE_BASE_MODEL` | `unsloth/gemma-4-e4b-it-unsloth-bnb-4bit` |
+| `VERSE_ADAPTER_MODEL` | `Aashishhhhhhhh/verse-v2-nepali-maithili` |
+| `VERSE_MAX_UPLOAD_MB` | `250` |
+| `VERSE_CHUNK_SECONDS` | `25` |
+| `VERSE_ALLOWED_ORIGINS` | `http://localhost:3000,http://127.0.0.1:3000` |
+| `NEXT_PUBLIC_VERSE_API_URL` | `http://localhost:8000` |
 
 ### Verify the project
 
 ```bash
-npm test
+cd frontend && npm test
+cd ../backend && VERSE_SKIP_MODEL_LOAD=1 pytest -q
 ```
 
 ## Project structure
@@ -264,7 +309,14 @@ frontend/
 |-- tests/                    # Rendered-page smoke tests
 `-- worker/                   # Cloudflare-compatible worker entry
 backend/
-`-- train_v2.py               # Clean VERSE V2 LoRA/PEFT training code
+|-- app/
+|   |-- main.py               # FastAPI health and caption routes
+|   |-- model_service.py      # Gemma base + VERSE V2 adapter inference
+|   |-- audio.py              # Media normalization and chunking
+|   `-- prompts.py            # All nine language task prompts
+|-- tests/                    # API, prompt, and chunking tests
+|-- requirements.txt          # GPU backend dependencies
+`-- train_v2.py               # VERSE V2 LoRA/PEFT training code
 docs/
 |-- kaggle-submission.md      # The writeup submitted to Kaggle
 |-- outreach.md               # NDFN and NFDN replies, and what changed because of them
