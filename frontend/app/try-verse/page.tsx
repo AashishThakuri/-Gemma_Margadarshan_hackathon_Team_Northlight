@@ -17,7 +17,7 @@ type CaptionStatus = "idle" | "processing" | "ready" | "error";
 type Preview =
   | { kind: "video"; src: string; title: string }
   | { kind: "audio"; src: string; title: string }
-  | { kind: "embed"; src: string; title: string; youtubeId?: string }
+  | { kind: "embed"; src: string; title: string }
   | { kind: "linked"; src: string; title: string };
 
 type CaptionResponse = {
@@ -30,14 +30,6 @@ type CaptionResponse = {
 const API_BASE_URL = (
   process.env.NEXT_PUBLIC_VERSE_API_URL ?? "http://localhost:8000"
 ).replace(/\/$/, "");
-
-const DEMO_VIDEO_ID = "nBpPe9UweWs";
-const DEMO_PREVIEW: Preview = {
-  kind: "embed",
-  src: `https://www.youtube-nocookie.com/embed/${DEMO_VIDEO_ID}?rel=0&cc_load_policy=0`,
-  title: "Weather and Small Talk — 30 second demo",
-  youtubeId: DEMO_VIDEO_ID,
-};
 
 const INPUT_MODES = [
   { id: "link", label: "PASTE A LINK", number: "01" },
@@ -76,7 +68,6 @@ function buildPreview(value: string): Preview | null {
         kind: "embed",
         src: `https://www.youtube-nocookie.com/embed/${youtubeId}?rel=0&cc_load_policy=0`,
         title: "YouTube video",
-        youtubeId,
       };
     }
 
@@ -115,7 +106,7 @@ export default function TryVerse() {
   const fileInput = useRef<HTMLInputElement>(null);
   const [mode, setMode] = useState<InputMode>("link");
   const [videoLink, setVideoLink] = useState("");
-  const [preview, setPreview] = useState<Preview | null>(DEMO_PREVIEW);
+  const [preview, setPreview] = useState<Preview | null>(null);
   const [mediaFile, setMediaFileState] = useState<File | null>(null);
   const [submittedUrl, setSubmittedUrl] = useState<string | null>(null);
   const [error, setError] = useState("");

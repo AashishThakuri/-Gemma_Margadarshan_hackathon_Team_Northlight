@@ -14,8 +14,14 @@ Multilingual speech recognition, translation, and live captions for English, Nep
 
 ![Verse landing page](frontend/public/verse-landing.png)
 
-> [!IMPORTANT]
-> **The public GPU endpoint is temporarily offline because our RunPod credits were exhausted during fine-tuning and evaluation. We sincerely apologize.** The repository includes the complete model-backed API and contains no hardcoded caption tracks. Reviewers can run VERSE V2 on their own NVIDIA GPU using the instructions below. We will restore the hosted endpoint as soon as GPU access is available.
+## Requirements to run
+
+- Linux with Python 3.10 or 3.11 and `ffmpeg`
+- NVIDIA CUDA GPU; at least 16 GB VRAM recommended
+- Node.js 22.13+ and npm
+- Internet access for the first public base-model and adapter download
+
+Follow [Run locally](#run-locally) to start the caption API and website.
 
 ## What is Verse?
 
