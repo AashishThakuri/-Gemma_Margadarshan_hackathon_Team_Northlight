@@ -67,7 +67,6 @@ const ABOUT_CASSETTE_WINDOW = {
 const NAVIGATION = [
   { label: "ABOUT", href: "#about" },
   { label: "FEATURES", href: "#features" },
-  { label: "LANGUAGES", href: "#languages" },
 ];
 
 const FEATURES = [
