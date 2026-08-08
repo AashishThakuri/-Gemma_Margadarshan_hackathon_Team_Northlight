@@ -185,23 +185,23 @@ html[data-preloader-seen="true"] .page.is-preloading .preloader {
 
 .preloader-word {
   position: absolute;
-  top: 50%;
-  left: 50%;
+  inset: 0;
   display: grid;
-  width: min(90%, 82rem);
+  width: 100%;
+  height: 100%;
   margin: 0;
   opacity: 0;
+  padding: 4.5rem clamp(1.5rem, 5vw, 5rem);
   place-items: center;
   text-align: center;
-  transform: translateY(125%) rotateX(-72deg);
-  translate: -50% -50%;
+  transform: rotateX(-72deg);
   visibility: hidden;
   will-change: transform, opacity;
 }
 
 .preloader-word:first-child {
   opacity: 1;
-  transform: translateY(0) rotateX(0);
+  transform: rotateX(0);
   visibility: visible;
 }
 

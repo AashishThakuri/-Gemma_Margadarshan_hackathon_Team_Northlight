@@ -175,10 +175,9 @@ export default function Home() {
       gsap.set(words, {
         autoAlpha: 0,
         rotateX: -72,
-        yPercent: 125,
-        transformOrigin: "50% 100%",
+        transformOrigin: "50% 50%",
       });
-      gsap.set(words[0], { autoAlpha: 1, rotateX: 0, yPercent: 0 });
+      gsap.set(words[0], { autoAlpha: 1, rotateX: 0 });
 
       const timeline = gsap.timeline({
         defaults: { ease: "power4.out" },
@@ -229,7 +228,6 @@ export default function Home() {
               {
                 autoAlpha: 0,
                 rotateX: 54,
-                yPercent: -125,
                 duration: 0.58,
                 ease: "power3.in",
               },
@@ -255,7 +253,6 @@ export default function Home() {
               {
                 autoAlpha: 1,
                 rotateX: 0,
-                yPercent: 0,
                 duration: 0.72,
               },
               revealAt,
@@ -267,7 +264,6 @@ export default function Home() {
               {
                 autoAlpha: 0,
                 rotateX: 54,
-                yPercent: -125,
                 duration: 0.58,
                 ease: "power3.in",
               },
@@ -280,7 +276,6 @@ export default function Home() {
         timeline.set(words.at(-1) ?? words[0], {
           autoAlpha: 1,
           rotateX: 0,
-          yPercent: 0,
         });
       }
 
