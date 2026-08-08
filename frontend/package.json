@@ -8,6 +8,7 @@
   "scripts": {
     "dev": "vinext dev",
     "build": "vinext build",
+    "vercel-build": "node scripts/fetch-public-assets.mjs && next build",
     "start": "vinext start",
     "test": "npm run build && node --test tests/rendered-html.test.mjs",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next"
@@ -25,7 +26,6 @@
   },
   "devDependencies": {
     "@cloudflare/vite-plugin": "1.37.1",
-    "@rolldown/binding-win32-x64-msvc": "^1.0.1",
     "@tailwindcss/postcss": "4.2.1",
     "@types/node": "22.19.19",
     "@types/react": "19.2.14",
@@ -40,6 +40,9 @@
     "vinext": "0.0.50",
     "vite": "8.0.13",
     "wrangler": "4.92.0"
+  },
+  "optionalDependencies": {
+    "@rolldown/binding-win32-x64-msvc": "^1.0.1"
   },
   "type": "module"
 }

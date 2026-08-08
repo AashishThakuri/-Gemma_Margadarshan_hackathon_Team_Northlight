@@ -521,7 +521,7 @@ export default function Home() {
         x: ["-42%", "42%"],
         opacity: [0.25, 0.72, 0.25],
         duration: 1800,
-        delay: (_, index) => index * 240,
+        delay: (_: unknown, index = 0) => index * 240,
         ease: "inOutSine",
         alternate: true,
         loop: true,
