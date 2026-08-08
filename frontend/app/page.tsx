@@ -351,7 +351,11 @@ export default function Home() {
         .fromTo(
           ".navbar",
           { clipPath: "inset(0 0 100% 0)" },
-          { clipPath: "inset(0 0 0% 0)", duration: 0.9 },
+          {
+            clipPath: "inset(0 0 0% 0)",
+            clearProps: "clipPath",
+            duration: 0.9,
+          },
           0,
         )
         .fromTo(
